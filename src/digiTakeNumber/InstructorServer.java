@@ -17,7 +17,7 @@ import javax.swing.WindowConstants;
 
 public class InstructorServer {
 	
-	private static final int PORT_NUM = 8000;
+	public static final int PORT_NUM = 9000;
 	
 	private HashSet<String> clients;
 	
@@ -51,6 +51,7 @@ public class InstructorServer {
 		try {
 			//make a new thread for every client that connects
 			while (true) {
+				System.out.println("Waiting for client");
 				new ClientThread(serverSocket.accept(), this).start();
 			}
 		}
@@ -70,7 +71,7 @@ public class InstructorServer {
 		System.out.println(requests);
 	}
 	
-	public void removeRequest(Request req) {
+	public void removeRequest(String req) {
 		requests.remove(req);
 		System.out.println(requests);
 	}
@@ -93,6 +94,7 @@ public class InstructorServer {
 		
 		public void run() {
 			try {
+				System.out.println("New client");
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 				output = new PrintWriter(socket.getOutputStream(), true);
@@ -110,10 +112,27 @@ public class InstructorServer {
 				while (true) {
 					String cIn = input.readLine();
 					if (cIn == null) return;
-					if (cIn.startsWith("REQUEST")) {
+					
+					if (cIn.startsWith("HELP")) {
 						server.addRequest(clientName);
-						System.out.println("Request from " + clientName);
+						System.out.println(clientName + " needs help");
 					}
+					
+					if (cIn.startsWith("CHECKPOINT")) {
+						server.addRequest(clientName);
+						System.out.println(clientName + " finished a checkpoint");
+					}
+					
+					if (cIn.startsWith("CLEARLOC")) {
+						System.out.println(clientName + " wants to clear location");
+					}
+					
+					if (cIn.startsWith("CANCEL")) {
+						System.out.println(clientName + " cancelled request");
+						server.removeRequest(clientName);
+					}
+					
+					
 				}	
 			}
 			

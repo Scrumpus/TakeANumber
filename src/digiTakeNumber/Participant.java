@@ -17,13 +17,14 @@ import javax.swing.WindowConstants;
 public class Participant {
 	private String name;
 	private int seatLoc;
+	private boolean pendingReq;
 	
 	private BufferedReader input;
 	private PrintWriter output;
 	private JFrame pFrame;
 	
 	public Participant() {
-		
+		pendingReq = false;
 	}
 	
 	public void setFrame() {
@@ -46,25 +47,66 @@ public class Participant {
 	public void connectToServer() throws IOException {
 		String serverAddress = getServerIP();
 		setName();
-		addRequestButton();
-		Socket socket = new Socket(serverAddress, 8000);
+		addRequestButtons();
+		Socket socket = new Socket(serverAddress, InstructorServer.PORT_NUM);
 		input = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		output = new PrintWriter(socket.getOutputStream(), true);
 		output.println(name);
 	}
 	
-	public void addRequestButton() {
+	public void addRequestButtons() {
 		JPanel panel = new JPanel();
-		JButton request = new JButton("Send Request");
+		JButton helpRequest = new JButton("Request Help");
+		JButton cpRequest = new JButton("Checkpoint Completed");
+		JButton clearLoc = new JButton("Clear location");
+		JButton cancelRequest = new JButton("Clear Request");
 		
-		request.addActionListener(new ActionListener() {
+		helpRequest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				output.println("REQUEST");
+				if (!pendingReq) {
+					output.println("HELP");
+					pendingReq = true;
+				}
+				else {
+					System.out.println("Request already pending");
+				}
 			}
 		});
 		
-		panel.add(request);
+		cpRequest.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (!pendingReq) {
+					output.println("CHECKPOINT");
+					pendingReq = true;
+				}
+				else {
+					System.out.println("Request already pending");
+				}
+			}
+		});
+		
+		clearLoc.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				output.println("CLEARLOC");
+			}
+		});
+		
+		cancelRequest.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (pendingReq) {
+					output.println("CANCEL");
+					pendingReq = false;
+				}
+			}
+		});
+		
+		
+		panel.add(helpRequest);
+		panel.add(cpRequest);
+		panel.add(clearLoc);
+		panel.add(cancelRequest);
+		
 		pFrame.add(panel);
 		pFrame.revalidate();
 		pFrame.repaint();
