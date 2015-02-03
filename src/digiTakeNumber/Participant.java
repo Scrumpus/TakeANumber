@@ -14,6 +14,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+/*
+ * This class connects a client to a server
+ * and gives options to send requests to the 
+ * server 
+ */
+
 public class Participant {
 	private String name;
 	private int seatLoc;
@@ -27,6 +33,9 @@ public class Participant {
 		pendingReq = false;
 	}
 	
+	/*
+	 * Create a new frame for the participant
+	 */
 	public void setFrame() {
 		pFrame = new JFrame("Client Frame");
 		pFrame.setSize(400,200);
@@ -34,27 +43,50 @@ public class Participant {
 		pFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 	}
 	
+	/*
+	 * Prompt participant for server address
+	 */
 	private String getServerIP() {
 		return JOptionPane.showInputDialog(
 				"Enter Instructor's IP Address");
 	}
 	
+	/*
+	 * Prompt participant for name
+	 */
 	private void setName() {
 		name = JOptionPane.showInputDialog(
 				"Enter Your Name");
 	}
 	
+	/*
+	 * Set up socket to connect to the server.
+	 * Set up input and output streams between
+	 * participant and server.
+	 */
 	public void connectToServer() throws IOException {
+		
+		//get server address and participant name
 		String serverAddress = getServerIP();
 		setName();
 		addRequestButtons();
+		
 		Socket socket = new Socket(serverAddress, InstructorServer.PORT_NUM);
 		input = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		output = new PrintWriter(socket.getOutputStream(), true);
+		
+		//send participant's name to the server
 		output.println(name);
+		
+		// TODO eventually, server will be sending data
+		// back to the clients. Need to handle server output
+		// here 
 	}
 	
+	/*
+	 * Add request buttons to the participant's frame.
+	 */
 	public void addRequestButtons() {
 		JPanel panel = new JPanel();
 		JButton helpRequest = new JButton("Request Help");
@@ -62,6 +94,10 @@ public class Participant {
 		JButton clearLoc = new JButton("Clear location");
 		JButton cancelRequest = new JButton("Clear Request");
 		
+		/*
+		 * request button listeners. Send a string to the client
+		 * depending on which request button was pressed
+		 */
 		helpRequest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!pendingReq) {
@@ -101,7 +137,7 @@ public class Participant {
 			}
 		});
 		
-		
+		//add buttons to client's frame
 		panel.add(helpRequest);
 		panel.add(cpRequest);
 		panel.add(clearLoc);

@@ -15,7 +15,9 @@ import javax.swing.WindowConstants;
 
 /**
  * The main opening class of the program.
- * This classes sole intention is to instantiate the client/server
+ * creates the welcome screen and creates a participant
+ * or instructor
+ * 
  * @author Team Digital Take-A-Number 
  * @version 11/16/2014
  *
@@ -61,6 +63,9 @@ public class Driver {
 		return;
 	}
 	
+	/*
+	 * Draw the welcome screen when the program is executed
+	 */
 	public void drawWelcomeScreen() {
 		welcomePanel = new JPanel();
 		joinLabButton = new JButton("Join Lab");
@@ -69,6 +74,10 @@ public class Driver {
 		welcomePanel.add(createLabButton);
 		mainFrame.add(welcomePanel);
 		
+		/*
+		 * When lab is joined, create new participant
+		 * and attempt to connect to server
+		 */
 		joinLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				participant = new Participant();
@@ -84,6 +93,10 @@ public class Driver {
 		}
 		);
 		
+		/*
+		 * When create lab is pressed, attempt to create new
+		 * InstructorServer and listen for client connections
+		 */
 		createLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				instructor = new InstructorServer();

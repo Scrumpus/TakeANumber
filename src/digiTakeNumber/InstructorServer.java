@@ -13,14 +13,22 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+
+/*
+ * This class sets up a server and allows multiple
+ * clients to connect to it. Also responds accordingly
+ * to any client input
+ */
 
 public class InstructorServer {
 	
+	//arbitrary port number
 	public static final int PORT_NUM = 9000;
 	
 	private HashSet<String> clients;
 	
+	//list of client printwriters so the server can send 
+	//updates to all clients
 	private HashSet<PrintWriter> clientWriters;
 	
 	private Vector<String> requests;
@@ -28,12 +36,18 @@ public class InstructorServer {
 	private JFrame iFrame;
 	private InstructorUI instUI;
 	
+	/*
+	 * Instantiate instance variables
+	 */
 	public InstructorServer() {
 		clients = new HashSet<String>();
 		clientWriters = new HashSet<PrintWriter>();
 		requests = new Vector<String>();
 	}
 	
+	/*
+	 * Create a new frame for the server
+	 */
 	public void setFrame() {
 		iFrame = new JFrame("Server Frame");
 		iFrame.setSize(400,200);
@@ -45,6 +59,11 @@ public class InstructorServer {
 		return iFrame;
 	}
 		
+	/*
+	 * Continuously listen for new clients to connect.
+	 * Every time a client connects to the server, create
+	 * a new threat for the connected socket
+	 */
 	public void listen() throws IOException {
 		ServerSocket serverSocket = new ServerSocket(PORT_NUM);
 		//new sUIThread(this).start();
@@ -60,17 +79,26 @@ public class InstructorServer {
 		}
 	}
 	
+	/*
+	 * Add client to server's list of clients
+	 */
 	public void addClient(String client) {
 		clients.add(client);
-
 		System.out.println(client + " connected");
 	}
 	
+	/*
+	 * add a request to the server's list of 
+	 * requests
+	 */
 	public void addRequest(String req) {
 		requests.addElement(req);
 		System.out.println(requests);
 	}
 	
+	/*
+	 * remove request from server's list of requests
+	 */
 	public void removeRequest(String req) {
 		requests.remove(req);
 		System.out.println(requests);
@@ -80,6 +108,11 @@ public class InstructorServer {
 		return clients;
 	}
 	
+	/*
+	 * A thread that is created for each client.
+	 * Handles all messages sent by the clients
+	 * to the server
+	 */
 	private class ClientThread extends Thread {
 		private String clientName;
 		private Socket socket;
@@ -108,7 +141,8 @@ public class InstructorServer {
 					break;
 				}
 				
-				//wait for client requests
+				//wait for client requests, print to the console
+				//depending on the request
 				while (true) {
 					String cIn = input.readLine();
 					if (cIn == null) return;
@@ -149,6 +183,7 @@ public class InstructorServer {
 		}
 	}
 	
+	// May need another thread to update UI?
 	private class sUIThread extends Thread {
 		private InstructorServer server;
 		private JFrame frame;
