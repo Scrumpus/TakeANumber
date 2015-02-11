@@ -56,7 +56,7 @@ public class InstructorServer {
 	/*
 	 * Continuously listen for new clients to connect.
 	 * Every time a client connects to the server, create
-	 * a new threat for the connected socket
+	 * a new thread for the connected socket
 	 */
 	public void listen() throws IOException {
 		
