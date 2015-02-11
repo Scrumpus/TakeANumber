@@ -1,5 +1,7 @@
 package digiTakeNumber;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,10 +11,6 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Vector;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 /*
  * This class sets up a server and allows multiple
@@ -33,8 +31,9 @@ public class InstructorServer {
 	
 	private Vector<String> requests;
 	
-	private JFrame iFrame;
 	private InstructorUI instUI;
+	
+	private ServerSocket sSocket;
 	
 	/*
 	 * Instantiate instance variables
@@ -48,16 +47,11 @@ public class InstructorServer {
 	/*
 	 * Create a new frame for the server
 	 */
-	public void setFrame() {
-		iFrame = new JFrame("Server Frame");
-		iFrame.setSize(400,200);
-		iFrame.setVisible(true);
-		JOptionPane.showMessageDialog(iFrame, "new frame");
+	public void setUI() {
+		instUI = new InstructorUI(this);
 	}
 	
-	public JFrame getFrame() {
-		return iFrame;
-	}
+
 		
 	/*
 	 * Continuously listen for new clients to connect.
@@ -65,17 +59,18 @@ public class InstructorServer {
 	 * a new threat for the connected socket
 	 */
 	public void listen() throws IOException {
-		ServerSocket serverSocket = new ServerSocket(PORT_NUM);
-		//new sUIThread(this).start();
+		
+		sSocket = new ServerSocket(PORT_NUM);
+		//make a new thread for every client that connects
+		new ListenerThread(sSocket, this).start();
+	
+	}
+	
+	public void stopListening() {
 		try {
-			//make a new thread for every client that connects
-			while (true) {
-				System.out.println("Waiting for client");
-				new ClientThread(serverSocket.accept(), this).start();
-			}
-		}
-		finally {
-			serverSocket.close();
+			sSocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -84,7 +79,7 @@ public class InstructorServer {
 	 */
 	public void addClient(String client) {
 		clients.add(client);
-		System.out.println(client + " connected");
+		instUI.addMessage(client + " connected");
 	}
 	
 	/*
@@ -108,6 +103,24 @@ public class InstructorServer {
 		return clients;
 	}
 	
+	private class ListenerThread extends Thread {
+		private ServerSocket sSocket;
+		private InstructorServer server;
+		public ListenerThread(ServerSocket sSocket, InstructorServer server) {
+			this.sSocket = sSocket;
+			this.server = server;
+		}
+		public void run() {
+			while(true) {
+				try {
+					new ClientThread(sSocket.accept(), server).start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/*
 	 * A thread that is created for each client.
 	 * Handles all messages sent by the clients
@@ -119,19 +132,20 @@ public class InstructorServer {
 		private BufferedReader input;
 		private PrintWriter output;
 		private InstructorServer server;
+		private boolean connected;
 		
 		public ClientThread(Socket socket, InstructorServer server) {
 			this.socket = socket;
 			this.server = server;
 		}
 		
+		//set up input streams and output streams for client
 		public void run() {
 			try {
 				System.out.println("New client");
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 				output = new PrintWriter(socket.getOutputStream(), true);
-				
 				//wait to get client's name
 				while (true) {
 					String cIn = input.readLine();
@@ -149,19 +163,23 @@ public class InstructorServer {
 					
 					if (cIn.startsWith("HELP")) {
 						server.addRequest(clientName);
+						instUI.addMessage(clientName + " needs help");
 						System.out.println(clientName + " needs help");
 					}
 					
 					if (cIn.startsWith("CHECKPOINT")) {
 						server.addRequest(clientName);
+						instUI.addMessage(clientName + " finished a checkpoint");
 						System.out.println(clientName + " finished a checkpoint");
 					}
 					
 					if (cIn.startsWith("CLEARLOC")) {
+						instUI.addMessage(clientName + " wants to clear location");
 						System.out.println(clientName + " wants to clear location");
 					}
 					
 					if (cIn.startsWith("CANCEL")) {
+						instUI.addMessage(clientName + " cancelled request");
 						System.out.println(clientName + " cancelled request");
 						server.removeRequest(clientName);
 					}
@@ -182,25 +200,6 @@ public class InstructorServer {
 			}
 		}
 	}
-	
-	// May need another thread to update UI?
-	private class sUIThread extends Thread {
-		private InstructorServer server;
-		private JFrame frame;
-		
-		public sUIThread(InstructorServer server) {
-			this.server = server;
-			frame = server.getFrame();
-		}
-		
-		public void run() {
-			JLabel label = new JLabel("Clients");
-			JPanel panel = new JPanel();
-			panel.add(label);
-			frame.add(panel);
-			frame.revalidate();
-			frame.repaint();
-		}
-	}
+
 	
 }

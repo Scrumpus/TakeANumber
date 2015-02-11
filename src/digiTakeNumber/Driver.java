@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
@@ -27,10 +28,11 @@ public class Driver {
 	private InstructorServer instructor;
 	private Participant participant;
 	
-	private JFrame mainFrame;
+	private JFrame welcomeFrame;
 	private JPanel welcomePanel;
 	private JButton createLabButton;
 	private JButton joinLabButton;
+	private JLabel waiting;
 	
 	
 	public Driver() {
@@ -56,23 +58,25 @@ public class Driver {
 	private void init(){
 		instructor = null;
 		participant = null;
-		mainFrame = new JFrame("Welcome");
-		mainFrame.setSize(400,200);
-		mainFrame.setVisible(true);
-		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		return;
 	}
 	
 	/*
 	 * Draw the welcome screen when the program is executed
 	 */
 	public void drawWelcomeScreen() {
+		welcomeFrame = new JFrame("Welcome");
+		welcomeFrame.setSize(400,200);
+		welcomeFrame.setVisible(true);
+		welcomeFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		welcomePanel = new JPanel();
 		joinLabButton = new JButton("Join Lab");
 		createLabButton = new JButton("Create Lab");
+		waiting = new JLabel("Trying to connect to lab...");
+		waiting.setVisible(false);
 		welcomePanel.add(joinLabButton);
 		welcomePanel.add(createLabButton);
-		mainFrame.add(welcomePanel);
+		welcomePanel.add(waiting);
+		welcomeFrame.add(welcomePanel);
 		
 		/*
 		 * When lab is joined, create new participant
@@ -80,15 +84,23 @@ public class Driver {
 		 */
 		joinLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				participant = new Participant();
-				participant.setFrame();
-				mainFrame.dispose();
 				try {
+					participant = new Participant();
+					//createLabButton.setEnabled(false);
+					//joinLabButton.setEnabled(false);;
+					//waiting.setVisible(true);
 					participant.connectToServer();
+					
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
+					participant.removeUI();
+					//waiting.setVisible(false);
+					//createLabButton.setEnabled(true);
+					//joinLabButton.setEnabled(true);
+					return;
 				}
-				
+				welcomeFrame.dispose();
+				participant.setUI();
 			}
 		}
 		);
@@ -99,18 +111,21 @@ public class Driver {
 		 */
 		createLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				instructor = new InstructorServer();
-				mainFrame.dispose();
-				instructor.setFrame();
 				try {
+					instructor = new InstructorServer();
 					instructor.listen();
+					
 				} catch (IOException e1) {
 					e1.printStackTrace();
-				}				
+					return;
+				}
+				welcomeFrame.dispose();
+				instructor.setUI();		
 			}
 		}
 		);
-		
+		welcomeFrame.revalidate();
+		welcomeFrame.repaint();
 	}
 
 }

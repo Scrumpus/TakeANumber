@@ -8,11 +8,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+
 
 /*
  * This class connects a client to a server
@@ -22,42 +19,58 @@ import javax.swing.WindowConstants;
 
 public class Participant {
 	private String name;
+	private String serverIP;
 	private int seatLoc;
 	private boolean pendingReq;
 	
 	private BufferedReader input;
 	private PrintWriter output;
-	private JFrame pFrame;
+	private ParticipantUI pUI;
 	
 	public Participant() {
 		pendingReq = false;
+		setServerIP();
+		setName();
 	}
+	
+	public boolean isPending() { return pendingReq; };
+	public void togglePending() { pendingReq = !pendingReq; }
 	
 	/*
 	 * Create a new frame for the participant
 	 */
-	public void setFrame() {
-		pFrame = new JFrame("Client Frame");
-		pFrame.setSize(400,200);
-		pFrame.setVisible(true);
-		pFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	public void setUI() {
+		pUI = new ParticipantUI(this);
+	}
+	public void removeUI() {
+		pUI.removeReq();
+	}
+	
+	/*
+	 * Send a message to the server
+	 */
+	public void sendServer(String msg) {
+		output.println(msg);
 	}
 	
 	/*
 	 * Prompt participant for server address
 	 */
-	private String getServerIP() {
-		return JOptionPane.showInputDialog(
+	public void setServerIP() {
+		serverIP =  JOptionPane.showInputDialog(
 				"Enter Instructor's IP Address");
 	}
+	
 	
 	/*
 	 * Prompt participant for name
 	 */
-	private void setName() {
+	public void setName() {
 		name = JOptionPane.showInputDialog(
 				"Enter Your Name");
 	}
+	
+	
 	
 	/*
 	 * Set up socket to connect to the server.
@@ -67,11 +80,8 @@ public class Participant {
 	public void connectToServer() throws IOException {
 		
 		//get server address and participant name
-		String serverAddress = getServerIP();
-		setName();
-		addRequestButtons();
 		
-		Socket socket = new Socket(serverAddress, InstructorServer.PORT_NUM);
+		Socket socket = new Socket(serverIP, InstructorServer.PORT_NUM);
 		input = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		output = new PrintWriter(socket.getOutputStream(), true);
@@ -84,68 +94,6 @@ public class Participant {
 		// here 
 	}
 	
-	/*
-	 * Add request buttons to the participant's frame.
-	 */
-	public void addRequestButtons() {
-		JPanel panel = new JPanel();
-		JButton helpRequest = new JButton("Request Help");
-		JButton cpRequest = new JButton("Checkpoint Completed");
-		JButton clearLoc = new JButton("Clear location");
-		JButton cancelRequest = new JButton("Clear Request");
-		
-		/*
-		 * request button listeners. Send a string to the client
-		 * depending on which request button was pressed
-		 */
-		helpRequest.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (!pendingReq) {
-					output.println("HELP");
-					pendingReq = true;
-				}
-				else {
-					System.out.println("Request already pending");
-				}
-			}
-		});
-		
-		cpRequest.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (!pendingReq) {
-					output.println("CHECKPOINT");
-					pendingReq = true;
-				}
-				else {
-					System.out.println("Request already pending");
-				}
-			}
-		});
-		
-		clearLoc.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				output.println("CLEARLOC");
-			}
-		});
-		
-		cancelRequest.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (pendingReq) {
-					output.println("CANCEL");
-					pendingReq = false;
-				}
-			}
-		});
-		
-		//add buttons to client's frame
-		panel.add(helpRequest);
-		panel.add(cpRequest);
-		panel.add(clearLoc);
-		panel.add(cancelRequest);
-		
-		pFrame.add(panel);
-		pFrame.revalidate();
-		pFrame.repaint();
-	}
+	
 
 }

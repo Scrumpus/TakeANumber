@@ -1,6 +1,7 @@
 package digiTakeNumber;
 
 import java.util.PriorityQueue;
+import java.util.Vector;
 
 /**
  * This class keeps track of the queue of requests
@@ -12,7 +13,7 @@ import java.util.PriorityQueue;
 public class LabState {
 	
 	private String[][] seatingChart;
-	private PriorityQueue<Request> requestQueue;
+	private Vector<Request> requestQueue;
 	private int aisleLocation;
 	
 	/**
