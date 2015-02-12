@@ -1,9 +1,11 @@
 package digiTakeNumber;
 
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.*;
 
@@ -16,6 +18,7 @@ import javax.swing.*;
 public class ParticipantUI {
 	
 	private RequestMenu reqMenu;
+	private SeatMenu seatMenu;
 	private JFrame locFrame;
 	private Participant client;
 	
@@ -25,11 +28,37 @@ public class ParticipantUI {
 	 */
 	public ParticipantUI(Participant client){
 		this.client = client;
-		reqMenu = new RequestMenu();
 	}
 	
+	public void refresh(JFrame frame) {
+		frame.revalidate();
+		frame.repaint();
+	}
+	
+	public void hideReq() {
+		reqMenu.hide();
+	}
+	public void showReq() {
+		reqMenu.show();
+	}
 	public void removeReq() {
 		reqMenu.remove();
+	}
+	
+	
+	public void setSeatMenu(int row, int col, int pos, int[][] seatStates) {
+		//hideReq();
+		seatMenu =  new SeatMenu(row, col, pos, seatStates);
+		seatMenu.init();
+	}
+	public void setRequestMenu() {
+		reqMenu = new RequestMenu();
+	}
+	public void hideSeatMenu() {
+		seatMenu.hide();
+	}
+	public void showSeatMenu() {
+		seatMenu.show();
 	}
 	
 	/*
@@ -111,6 +140,12 @@ public class ParticipantUI {
 			reqFrame.repaint();
 		}
 		
+		public void hide() {
+			reqFrame.setVisible(false);
+		}
+		public void show() {
+			reqFrame.setVisible(true);
+		}
 		public void hideRequestButtons() {
 			helpRequest.setVisible(false);
 			cpRequest.setVisible(false);
@@ -126,49 +161,87 @@ public class ParticipantUI {
 	
 	
 	private class SeatMenu {
-		public SeatMenu() {
+		private int rows;
+		private int cols;
+		private int aisle;
+		int[][] seatStates;
+		private JFrame seatMenuFrame = new JFrame("Select a seat");
+		private JPanel leftSide = new JPanel();
+		private JPanel rightSide = new JPanel();
+		private JPanel seatsPanel = new JPanel();
+		private JButton select = new JButton("Join lab");
+		private GridLayout seatSpacing = new GridLayout(1,2);
+		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
+		
+		public SeatMenu(int rows, int cols, int aisle, int[][] seatStates) {
+			this.rows = rows;
+			this.cols = cols;
+			this.aisle = aisle;
+			this.seatStates = seatStates;
+		}
+		
+		public void init() {
+			seatsPanel.setLayout(seatSpacing);
+			leftSide.setLayout(new GridLayout(rows, aisle));
+			rightSide.setLayout(new GridLayout(rows, cols - aisle));
 			
+			for (int i = 0; i < rows; i++) {
+				seats.addElement(new Vector<JButton>());
+				for (int j = 0; j < aisle; j++) {
+					seats.get(i).add(new JButton("Seat"));
+					if (seatStates[i][j] != 0) {
+						seats.get(i).get(j).setEnabled(false);
+					}
+					seats.get(i).get(j).addActionListener(seatSelect(i,j));
+					leftSide.add(seats.get(i).get(j));
+				}
+				for (int k = aisle; k < cols; k++) {
+					seats.get(i).add(new JButton("Seat"));
+					if (seatStates[i][k] != 0) {
+						seats.get(i).get(k).setEnabled(false);
+					}
+					seats.get(i).get(k).addActionListener(seatSelect(i,k));
+					rightSide.add(seats.get(i).get(k));
+				}
+			}
+			seatsPanel.add(leftSide);
+			seatsPanel.add(rightSide);
+			seatSpacing.setHgap(30);
+			seatSpacing.layoutContainer(seatsPanel);
+			seatMenuFrame.add(seatsPanel);
+			seatMenuFrame.pack();
+			seatMenuFrame.setVisible(true);
+			refresh(seatMenuFrame);
+		}
+		
+		public ActionListener seatSelect(final int row, final int col) {
+			return new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					client.setRow(row);
+					client.setCol(col);
+					System.out.println("client row: " + row);
+					System.out.println("client col: " + col);
+					client.sendServer("TAKESEAT:" + row + "#" + col);
+					hideSeatMenu();
+					//showReq();
+				}
+			};
+		}
+		
+		public void hide() {
+			seatMenuFrame.setVisible(false);
+		}
+		public void show() {
+			seatMenuFrame.setVisible(true);
+		}
+		
+		public void disableSeat(int row, int col) {
+			seats.get(row).get(col).setEnabled(false);
+		}
+		
+		public void enableSeat(int row, int col) {
+			seats.get(row).get(col).setEnabled(true);
 		}
 	}
-	
-	/**
-	 * Called to paint the whole window appropriately
-	 * @param g The graphics object to do the drawing with
-	 */
-	public void paint(Graphics g){
-		
-	}
-	
 
-	/**
-	 * Called to paint the Select Seat Location Screen
-	 * @param g The graphics object to do the drawing with
-	 */
-	private void drawSelectSeatLocScreen(Graphics g){
-		
-	}
-
-	/**
-	 * Called to paint the Input Name Screen
-	 * @param g The graphics object to do the drawing with
-	 */
-	private void drawInputNameScreen(Graphics g){
-		
-	}
-
-	/**
-	 * Called to paint the Select Request Screen
-	 * @param g The graphics object to do the drawing with
-	 */
-	public void drawSelectRequestScreen(){
-		
-	}
-	
-	/**
-	 * Called to paint the Request Received Screen
-	 * @param g The graphics object to do the drawing with
-	 */
-	private void drawRequestReceivedScreen(Graphics g){
-		
-	}
 }

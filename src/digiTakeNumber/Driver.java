@@ -86,41 +86,30 @@ public class Driver {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					participant = new Participant();
-					//createLabButton.setEnabled(false);
-					//joinLabButton.setEnabled(false);;
-					//waiting.setVisible(true);
+					participant.setUI();
 					participant.connectToServer();
+					participant.getUI().setRequestMenu();
+					welcomeFrame.dispose();
 					
 				} catch (IOException ioe) {
-					ioe.printStackTrace();
-					participant.removeUI();
-					//waiting.setVisible(false);
-					//createLabButton.setEnabled(true);
-					//joinLabButton.setEnabled(true);
+					//ioe.printStackTrace();
+					JOptionPane.showMessageDialog(welcomeFrame, "Could not connect to lab");
 					return;
 				}
-				welcomeFrame.dispose();
-				participant.setUI();
+				
 			}
 		}
 		);
 		
 		/*
-		 * When create lab is pressed, attempt to create new
-		 * InstructorServer and listen for client connections
+		 * When create lab is pressed, create the seating layout
+		 * option menu for the instructor and close welcome screen
 		 */
 		createLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					instructor = new InstructorServer();
-					instructor.listen();
-					
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					return;
-				}
-				welcomeFrame.dispose();
-				instructor.setUI();		
+				instructor = new InstructorServer();
+				instructor.setUI();	
+				welcomeFrame.dispose();	
 			}
 		}
 		);

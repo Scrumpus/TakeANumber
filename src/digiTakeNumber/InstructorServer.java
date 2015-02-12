@@ -21,13 +21,13 @@ import java.util.Vector;
 public class InstructorServer {
 	
 	//arbitrary port number
-	public static final int PORT_NUM = 9000;
+	public static final int PORT_NUM = 8000;
 	
-	private HashSet<String> clients;
+	private Vector<String> clients;
 	
 	//list of client printwriters so the server can send 
 	//updates to all clients
-	private HashSet<PrintWriter> clientWriters;
+	private Vector<PrintWriter> clientWriters;
 	
 	private Vector<String> requests;
 	
@@ -35,15 +35,26 @@ public class InstructorServer {
 	
 	private ServerSocket sSocket;
 	
+	private LabState labState;
+	
+	private boolean labReady;
+	
 	/*
 	 * Instantiate instance variables
 	 */
 	public InstructorServer() {
-		clients = new HashSet<String>();
-		clientWriters = new HashSet<PrintWriter>();
+		clients = new Vector<String>();
+		clientWriters = new Vector<PrintWriter>();
 		requests = new Vector<String>();
+		labReady = false;
 	}
 	
+	public void setReady() {
+		labReady = true;
+	}
+	public boolean isReady() {
+		return labReady;
+	}
 	/*
 	 * Create a new frame for the server
 	 */
@@ -51,18 +62,36 @@ public class InstructorServer {
 		instUI = new InstructorUI(this);
 	}
 	
+	public void setLabState(LabState labState) {
+		this.labState = labState;
+	}
+	
+	public LabState getLabState() { return labState; }
 
+	public String seatsToString() {
+		String temp = "";
+		int[][] seats = labState.getSeatingChart();
+		int rows = labState.getRows();
+		int cols = labState.getCols();
+		//System.out.println(rows);
+		//System.out.println(cols);
+		for (int i = 0; i < rows; i++) {
+			for (int j =0; j < cols; j ++) {
+				temp = temp + seats[i][j];
+			}
+		}
+		return temp;
+	}
 		
 	/*
 	 * Continuously listen for new clients to connect.
 	 * Every time a client connects to the server, create
-	 * a new thread for the connected socket
+	 * a new threat for the connected socket
 	 */
 	public void listen() throws IOException {
 		
-		sSocket = new ServerSocket(PORT_NUM);
-		//make a new thread for every client that connects
-		new ListenerThread(sSocket, this).start();
+		//make a thread that constantly listens for new clients to connect
+		new ListenerThread().start();
 	
 	}
 	
@@ -77,10 +106,12 @@ public class InstructorServer {
 	/*
 	 * Add client to server's list of clients
 	 */
-	public void addClient(String client) {
+	public void addClient(String client, int row, int col) {
 		clients.add(client);
-		instUI.addMessage(client + " connected");
+		System.out.println(client + " sat at " + row + " " + col);
+		instUI.addMessage(client + " sat at " + row + " " + col);
 	}
+	
 	
 	/*
 	 * add a request to the server's list of 
@@ -99,21 +130,22 @@ public class InstructorServer {
 		System.out.println(requests);
 	}
 	
-	public HashSet<String> getClients() {
+	public Vector<String> getClients() {
 		return clients;
 	}
 	
 	private class ListenerThread extends Thread {
-		private ServerSocket sSocket;
-		private InstructorServer server;
-		public ListenerThread(ServerSocket sSocket, InstructorServer server) {
-			this.sSocket = sSocket;
-			this.server = server;
-		}
+		public ListenerThread() { };
 		public void run() {
+			//while (!labReady) { }
+			try {
+				sSocket = new ServerSocket(PORT_NUM);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			while(true) {
 				try {
-					new ClientThread(sSocket.accept(), server).start();
+					new ClientThread(sSocket.accept()).start();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -132,11 +164,12 @@ public class InstructorServer {
 		private BufferedReader input;
 		private PrintWriter output;
 		private InstructorServer server;
+		private int rowLoc;
+		private int colLoc;
 		private boolean connected;
 		
-		public ClientThread(Socket socket, InstructorServer server) {
+		public ClientThread(Socket socket) {
 			this.socket = socket;
-			this.server = server;
 		}
 		
 		//set up input streams and output streams for client
@@ -146,29 +179,64 @@ public class InstructorServer {
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 				output = new PrintWriter(socket.getOutputStream(), true);
+				
+				String cIn;
+				
 				//wait to get client's name
 				while (true) {
-					String cIn = input.readLine();
+					cIn = input.readLine();
 					if (cIn == null) return;
-					clientName = cIn;
-					server.addClient(clientName);
-					break;
+					if (cIn.startsWith("NAME:")) {
+						clientName = cIn.substring(5);
+						break;
+					}
 				}
+				
+				
+				int rows = labState.getRows();
+				int cols = labState.getCols();
+				int aisle = labState.getAisle();
+				int[][] sChart = labState.getSeatingChart();
+				String seats = seatsToString();
+				
+				
+				//send client seating dimensions and wait
+				//to receive seating locations
+				output.println("SEATDIM:" + rows + "#" + 
+								cols + "#" + aisle + "#" + seats);
+				while (true) {
+					cIn = input.readLine();
+					if (cIn == null) return;
+					if (cIn.startsWith("TAKESEAT:")) {
+						String[] takenSeat = cIn.substring(9).split("#");
+						int takeRow = Integer.parseInt(takenSeat[0]);
+						int takeCol = Integer.parseInt(takenSeat[1]);
+						rowLoc = takeRow;
+						colLoc = takeCol;
+						labState.takeSeat(takeRow, takeCol);
+						addClient(clientName, rowLoc, colLoc);
+						break;
+					}
+				}
+				
 				
 				//wait for client requests, print to the console
 				//depending on the request
+				
 				while (true) {
-					String cIn = input.readLine();
+					cIn = input.readLine();
 					if (cIn == null) return;
 					
 					if (cIn.startsWith("HELP")) {
-						server.addRequest(clientName);
+						//server.addRequest(clientName);
+						addRequest(clientName);
 						instUI.addMessage(clientName + " needs help");
 						System.out.println(clientName + " needs help");
 					}
 					
 					if (cIn.startsWith("CHECKPOINT")) {
-						server.addRequest(clientName);
+						//server.addRequest(clientName);
+						addRequest(clientName);
 						instUI.addMessage(clientName + " finished a checkpoint");
 						System.out.println(clientName + " finished a checkpoint");
 					}
@@ -181,7 +249,7 @@ public class InstructorServer {
 					if (cIn.startsWith("CANCEL")) {
 						instUI.addMessage(clientName + " cancelled request");
 						System.out.println(clientName + " cancelled request");
-						server.removeRequest(clientName);
+						removeRequest(clientName);
 					}
 					
 					

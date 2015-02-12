@@ -20,8 +20,10 @@ import javax.swing.JOptionPane;
 public class Participant {
 	private String name;
 	private String serverIP;
-	private int seatLoc;
+	private int seatRow;
+	private int seatCol;
 	private boolean pendingReq;
+	private LabState labState;
 	
 	private BufferedReader input;
 	private PrintWriter output;
@@ -33,8 +35,17 @@ public class Participant {
 		setName();
 	}
 	
+	public int getRow() { return seatRow; }
+	public int getCol() { return seatCol; }
+	public void setRow(int row) { seatRow = row; }
+	public void setCol(int col) { seatCol = col; }
+	
+	
 	public boolean isPending() { return pendingReq; };
 	public void togglePending() { pendingReq = !pendingReq; }
+	
+	public LabState getLabState() { return labState; }
+	
 	
 	/*
 	 * Create a new frame for the participant
@@ -44,6 +55,9 @@ public class Participant {
 	}
 	public void removeUI() {
 		pUI.removeReq();
+	}
+	public ParticipantUI getUI() {
+		return pUI;
 	}
 	
 	/*
@@ -70,7 +84,17 @@ public class Participant {
 				"Enter Your Name");
 	}
 	
-	
+	public int[][] parseSeatingStates(String sStates) {
+		int rows = labState.getRows();
+		int cols = labState.getCols();
+		int[][] seatStates = new int[rows][cols];
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				seatStates[i][j] = Integer.parseInt(sStates.charAt(i*cols + j) + "");
+			}
+		}
+		return seatStates;
+	}
 	
 	/*
 	 * Set up socket to connect to the server.
@@ -78,22 +102,59 @@ public class Participant {
 	 * participant and server.
 	 */
 	public void connectToServer() throws IOException {
-		
-		//get server address and participant name
-		
 		Socket socket = new Socket(serverIP, InstructorServer.PORT_NUM);
 		input = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		output = new PrintWriter(socket.getOutputStream(), true);
+		System.out.println("Start listening");
+		new ServerThread(this).start();
 		
-		//send participant's name to the server
-		output.println(name);
-		
-		// TODO eventually, server will be sending data
-		// back to the clients. Need to handle server output
-		// here 
 	}
 	
-	
+	// thread that camps on the server port
+	// and reponds to server messages
+	private class ServerThread extends Thread {
+		private Participant client;
+		public ServerThread(Participant client) {
+			this.client = client;
+		}
+		public void run() {
+			int row, col, aisle;
+			String sIn;
+			//get server address and participant name
+			try {
+				//send participant's name to the server
+				//System.out.println("write name to client");
+				output.println("NAME:" + name);
+			
+				while (true) {
+					sIn = input.readLine();
+					if (sIn == null) return;
+					
+					if (sIn.startsWith("SEATDIM:")) {
+						String[] dims = sIn.substring(8).split("#");
+						row = Integer.parseInt(dims[0]);
+						col = Integer.parseInt(dims[1]);
+						aisle = Integer.parseInt(dims[2]);
+						labState = new LabState(row, col, aisle);
+						System.out.println(dims[3]);
+						int[][] seatStates = parseSeatingStates(dims[3]);
+						//System.out.println(row);
+						//System.out.println(col);
+						//System.out.println(aisle);
+						//System.out.println(dims[3]);
+						pUI.setSeatMenu(row, col, aisle, seatStates);
 
+					}
+					
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			
+			
+		}
+	}
+	
 }
