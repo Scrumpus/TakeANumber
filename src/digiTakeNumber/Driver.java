@@ -40,7 +40,7 @@ public class Driver {
 	}
 	
 	/**
-	 * Starting method of the whole program. Gets init to start doing its job
+	 * Draw the welcome screen of the application
 	 * @param args 
 	 */
 	public static void main(String[] args) {
@@ -61,7 +61,7 @@ public class Driver {
 	}
 	
 	/*
-	 * Draw the welcome screen when the program is executed
+	 * method to draw the welcome screen when the program is executed
 	 */
 	public void drawWelcomeScreen() {
 		welcomeFrame = new JFrame("Welcome");
@@ -86,41 +86,39 @@ public class Driver {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					participant = new Participant();
-					//createLabButton.setEnabled(false);
-					//joinLabButton.setEnabled(false);;
-					//waiting.setVisible(true);
+					
+					//asks participant for seat position
+					participant.setUI();
 					participant.connectToServer();
 					
+					//create the request menu
+					participant.getUI().setRequestMenu();
+					
+					//remove the welcome frame
+					welcomeFrame.dispose();
+					
 				} catch (IOException ioe) {
-					ioe.printStackTrace();
-					participant.removeUI();
-					//waiting.setVisible(false);
-					//createLabButton.setEnabled(true);
-					//joinLabButton.setEnabled(true);
+					//ioe.printStackTrace();
+					
+					//message if connection to lab failed
+					JOptionPane.showMessageDialog(welcomeFrame, "Could not connect to lab");
 					return;
 				}
-				welcomeFrame.dispose();
-				participant.setUI();
+				
 			}
 		}
 		);
 		
 		/*
-		 * When create lab is pressed, attempt to create new
-		 * InstructorServer and listen for client connections
+		 * When create lab is pressed, create the seating layout
+		 * option menu for the instructor and close welcome screen
 		 */
 		createLabButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					instructor = new InstructorServer();
-					instructor.listen();
-					
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					return;
-				}
-				welcomeFrame.dispose();
-				instructor.setUI();		
+				//create instructor, add seating menu and message screen
+				instructor = new InstructorServer();
+				instructor.setUI();	
+				welcomeFrame.dispose();	
 			}
 		}
 		);

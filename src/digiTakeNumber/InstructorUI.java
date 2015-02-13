@@ -27,50 +27,46 @@ public class InstructorUI {
 	private InstructorServer server;
 	
 	/**
-	 * Constructor for ServerUI
+	 * Constructor for ServerUI. Creates a seating layout and 
+	 * client message area
 	 */
 	public InstructorUI(InstructorServer server){
 		this.server = server;
 		iFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		//addCloseButton();
+		setSeatingLayout();
 		addMessageArea();
-		//seatingLayout = new SeatingLayout();
 		iFrame.pack();
 		iFrame.setVisible(true);
 	}
 	
+	//initializes the seating layout
+	public void setSeatingLayout() {
+		seatingLayout = new SeatingLayout();
+		seatingLayout.init();
+		seatingLayout.setDefault();
+	}
 	
+	//initializes the message area
 	public void addMessageArea() {
 		messages = new JTextArea(8, 40);
 		messages.setEditable(false);;
 		iFrame.getContentPane().add(new JScrollPane(messages), "Center");
 	}
 	
-	public void addCloseButton() {
-		JPanel panel = new JPanel();
-		JButton closeButton = new JButton("Close Lab");
-		
-		closeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("Clicked");
-				//server.stopListening();				
-			}
-		}
-		);
-		
-		panel.add(closeButton);
-		iFrame.add(panel);
-		iFrame.revalidate();
-		iFrame.repaint();
-		System.out.println(iFrame);
-		
-	}
-	
+	//add message to client messages
 	public void addMessage(String message) {
 		messages.append(message + "\n");
 	}
 	
+	//helper class that keeps track of the seating layout
+	//as the lab progresses
 	private class SeatingLayout {
+		//default dimensions
+		private static final int DEFAULT_ROWS = 5;
+		private static final int DEFAULT_COLS = 7;
+		private static final int DIVISOR = 4;
+		
 		private int numRows;
 		private int numCols;
 		private int divLoc;
@@ -78,13 +74,18 @@ public class InstructorUI {
 		private JPanel rightSide = new JPanel();
 		private JPanel options = new JPanel();
 		private JPanel seatsPanel = new JPanel();
+		
+		//left side and right side of the lab will be put on a 
+		//Gridlayout to show the divisor
 		private GridLayout seatSpacing = new GridLayout(1,2);
+		
 		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
 		private JComboBox rowNum;
 		private JComboBox colNum;
 		private JComboBox divisor;
 		private JButton apply = new JButton("Apply Dimensions");
 		private JButton create = new JButton("Create lab");
+		private JButton endLab = new JButton("End lab");
 		private final String[] rowOpts = {"1","2","3","4","5","6","7","8",
 										  "9","10","11","12","13","14","15"};
 		private final String[] colOpts = {"1","2","3","4","5","6","7","8",
@@ -92,8 +93,11 @@ public class InstructorUI {
 		private final String[] divOpts = {"1","2","3","4","5","6","7","8",
 				  						  "9","10","11","12","13","14","15"};;
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public SeatingLayout() {
+		public SeatingLayout() {	
 			
+		}
+		
+		public void init() {
 			//this panel contains the left and right side of the room
 			seatsPanel.setLayout(seatSpacing);
 			
@@ -106,11 +110,12 @@ public class InstructorUI {
 			rowNum = new JComboBox(rowOpts);
 			colNum = new JComboBox(colOpts);
 			divisor = new JComboBox(divOpts);
-			options.add(rowNum);
 			options.add(colNum);
+			options.add(rowNum);
 			options.add(divisor);
 			options.add(create);
 			
+			//handle Apply Dimensions button click
 			apply.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					leftSide.removeAll();
@@ -126,15 +131,6 @@ public class InstructorUI {
 					rightSide.setLayout(new GridLayout(numRows, numCols - divLoc));
 					
 					seats.removeAllElements();
-					/*
-					for (int i = 0; i < numRows; i++) {
-						for (int j = 0; j < numCols; j++) {
-							seats.get(i).add(new JButton("Seat"));
-							seats.get(i).get(j).setPreferredSize(new Dimension(10,20));
-						}
-					}
-					*/
-					
 
 					for (int i = 0; i < numRows; i++) {
 						for (int j = 0; j < divLoc; j++) {
@@ -153,76 +149,87 @@ public class InstructorUI {
 				}
 			});
 			
-			
-			
-			
+			//handle Create Lab button click
 			create.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					
+					int confirm = JOptionPane.showConfirmDialog(iFrame, "Is this correct?");
+					if (confirm == JOptionPane.YES_OPTION) {
+						server.setLabState(new LabState(numRows, numCols, divLoc));
+						options.removeAll();
+						options.add(endLab);
+						refreshFrame();
+						System.out.println("Lab created");
+						
+						// start listening for clients
+						try {
+							server.listen();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					}
 				}
 			});
 			
-			
-			
-			
+			//handle End Lab button click
+			endLab.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int confirm = JOptionPane.showConfirmDialog(iFrame,
+									"Are you sure you want to end lab?");
+					if (confirm == JOptionPane.YES_OPTION) {
+						System.exit(0);
+					}				
+				}
+			});
 			
 			iFrame.setLayout(new GridLayout(3,1));
 			iFrame.add(seatsPanel);
 			iFrame.add(options, BorderLayout.SOUTH);
 			refreshFrame();
 		}
+		
+		//set the default dimensions of the lab before any customizations
+		public void setDefault() {
+			leftSide.removeAll();
+			rightSide.removeAll();
+			seatsPanel.removeAll();
+			seats.removeAllElements();
+			
+			numCols = DEFAULT_COLS;
+			numRows = DEFAULT_ROWS;
+			divLoc = DIVISOR;
+			leftSide.setLayout(new GridLayout(numRows, divLoc));
+			rightSide.setLayout(new GridLayout(numRows, numCols - divLoc));
+			
+			for (int i = 0; i < numRows; i++) {
+				for (int j = 0; j < divLoc; j++) {
+					leftSide.add(new JButton("Seat"));
+				}
+				for (int k = 0; k < numCols - divLoc; k++) {
+					rightSide.add(new JButton("Seat"));
+				}
+			}
+					
+			seatsPanel.add(leftSide);
+			seatsPanel.add(rightSide);
+			seatSpacing.setHgap(30);
+			seatSpacing.layoutContainer(seatsPanel);
+			
+			rowNum.setSelectedItem("" + DEFAULT_ROWS);
+			colNum.setSelectedItem("" + DEFAULT_COLS);
+			divisor.setSelectedItem("" + DIVISOR);
+			
+			refreshFrame();
+		}
+		
+		public void disableSeat(int row, int col) {
+			
+		}
+		
+		public void openSeat(int row, int col) {
+			
+		}
 	}
-	
-	
-	/**
-	 * Main drawing method for the entire program
-	 * @param g graphics component
-	 */
-	public void paint(Graphics g){
-		return;
-	}
-	
-	/**
-	 * Draws the welcome screen of the program.
-	 * @param g graphics component
-	 */
-	private void drawWelcomeScreen(Graphics g){
-
-	}
-	
-	/**
-	 * Draws the screen to enter the dimensions of the
-	 * lab room.
-	 * @param g graphics component
-	 */
-	private void drawInputLabInfoScreen(Graphics g){
-		return;
-	}
-
-	/**
-	 * Draws the screen that will be seen by the instructor
-	 * @param g graphics component
-	 */
-	private void drawInstructorLabDisplay(Graphics g){
-		return;
-	}
-
-	/**
-	 * Draws the finish lab screen for the instructor
-	 * @param g graphics component
-	 */
-	private void drawInstructorFinishLabScreen(Graphics g){
-		return;
-	}
-
-	/**
-	 * Draws the lab overview screen once a lab has been
-	 * finished
-	 * @param g graphics component
-	 */
-	private void drawLabOverviewScreen(Graphics g){
-		return;
-	}
+		
 	
 	public void drawClientList() {
 		
