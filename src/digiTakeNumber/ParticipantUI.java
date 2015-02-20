@@ -75,7 +75,7 @@ public class ParticipantUI {
 		public RequestMenu() {
 			reqFrame = new JFrame("Request Frame");
 			reqFrame.setSize(400,200);
-			reqFrame.setVisible(true);
+			reqFrame.setVisible(false);
 			reqFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			buttonPanel = new JPanel();
 			helpRequest = new JButton("Request Help");
@@ -115,7 +115,11 @@ public class ParticipantUI {
 			
 			clearLoc.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					client.sendServer("CLEARLOC");
+					client.sendServer("CLEARLOC" + client.getRow() + "#" + client.getCol());
+					client.setRow(-1);
+					client.setCol(-1);
+					showSeatMenu();
+					reqFrame.setVisible(false);
 				}
 			});
 			
@@ -149,10 +153,12 @@ public class ParticipantUI {
 		public void hideRequestButtons() {
 			helpRequest.setVisible(false);
 			cpRequest.setVisible(false);
+			clearLoc.setVisible(false);
 		}
 		public void showRequestButtons() {
 			helpRequest.setVisible(true);
 			cpRequest.setVisible(true);
+			clearLoc.setVisible(true);
 		}
 		public void remove() {
 			reqFrame.dispose();
@@ -226,7 +232,7 @@ public class ParticipantUI {
 					System.out.println("client col: " + col);
 					client.sendServer("TAKESEAT:" + row + "#" + col);
 					hideSeatMenu();
-					//showReq();
+					showReq();
 				}
 			};
 		}

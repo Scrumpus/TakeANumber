@@ -202,12 +202,13 @@ public class InstructorUI {
 			
 			for (int i = 0; i < numRows; i++) {
 				for (int j = 0; j < divLoc; j++) {
-					leftSide.add(new JButton("Seat"));
+					leftSide.add(new JButton(i + " , " + j));
 				}
 				for (int k = 0; k < numCols - divLoc; k++) {
-					rightSide.add(new JButton("Seat"));
+					rightSide.add(new JButton(i + " , " + (k+divLoc)));
 				}
 			}
+			
 					
 			seatsPanel.add(leftSide);
 			seatsPanel.add(rightSide);

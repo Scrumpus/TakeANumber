@@ -39,6 +39,8 @@ public class InstructorServer {
 	
 	private boolean labReady;
 	
+	private Vector<String> topThree;
+	
 	/*
 	 * Instantiate instance variables
 	 */
@@ -112,6 +114,12 @@ public class InstructorServer {
 		clients.add(client);
 		System.out.println(client + " sat at " + row + " " + col);
 		instUI.addMessage(client + " sat at " + row + " " + col);
+	}
+	
+	public void removeClient(String client, int row, int col) {
+		clients.remove(client);
+		System.out.println(client + " cleared location from " + row + " " + col);
+		instUI.addMessage(client + " cleared location from " + row + " " + col);
 	}
 	
 	
@@ -212,56 +220,72 @@ public class InstructorServer {
 				//to receive seating locations
 				output.println("SEATDIM:" + rows + "#" + 
 								cols + "#" + aisle + "#" + seats);
-				//once client takse a seat, update the lab state
-				//and add the client
-				while (true) {
-					cIn = input.readLine();
-					if (cIn == null) return;
-					if (cIn.startsWith("TAKESEAT:")) {
-						String[] takenSeat = cIn.substring(9).split("#");
-						int takeRow = Integer.parseInt(takenSeat[0]);
-						int takeCol = Integer.parseInt(takenSeat[1]);
-						rowLoc = takeRow;
-						colLoc = takeCol;
-						labState.takeSeat(takeRow, takeCol);
-						addClient(clientName, rowLoc, colLoc);
-						break;
+				
+				while(true){
+					//once client takes a seat, update the lab state
+					//and add the client
+					boolean firstLoop = true;
+					boolean secondLoop = false;
+					while (firstLoop) {
+						cIn = input.readLine();
+						if (cIn == null) return;
+						if (cIn.startsWith("TAKESEAT:")) {
+							String[] takenSeat = cIn.substring(9).split("#");
+							int takeRow = Integer.parseInt(takenSeat[0]);
+							int takeCol = Integer.parseInt(takenSeat[1]);
+							rowLoc = takeRow;
+							colLoc = takeCol;
+							labState.takeSeat(takeRow, takeCol);
+							addClient(clientName, rowLoc, colLoc);
+							firstLoop = false;
+							secondLoop = true;
+						}
 					}
+					
+					
+					//wait for client requests, add message
+					//depending on the request
+					
+					while (secondLoop) {
+						cIn = input.readLine();
+						if (cIn == null) return;
+						
+						if (cIn.startsWith("HELP")) {
+							addRequest(clientName);
+							topThree = getTopThree(requests);
+							instUI.addMessage(clientName + " needs help");
+							System.out.println(clientName + " needs help");
+						}
+						
+						if (cIn.startsWith("CHECKPOINT")) {
+							addRequest(clientName);
+							instUI.addMessage(clientName + " finished a checkpoint");
+							System.out.println(clientName + " finished a checkpoint");
+							topThree = getTopThree(requests);
+						}
+						
+						if (cIn.startsWith("CLEARLOC")) {
+							instUI.addMessage(clientName + " wants to clear location");
+							System.out.println(clientName + " wants to clear location");
+							String[] str = cIn.substring(8).split("#");
+							int row = Integer.parseInt(str[0]);
+							int col = Integer.parseInt(str[1]);
+							labState.leaveSeat(row, col);
+							removeClient(clientName, row, col);
+							secondLoop = false;
+							firstLoop = true;
+						}
+						
+						if (cIn.startsWith("CANCEL")) {
+							instUI.addMessage(clientName + " cancelled request");
+							System.out.println(clientName + " cancelled request");
+							removeRequest(clientName);
+							topThree = getTopThree(requests);
+						}
+						
+						
+					}	
 				}
-				
-				
-				//wait for client requests, add message
-				//depending on the request
-				
-				while (true) {
-					cIn = input.readLine();
-					if (cIn == null) return;
-					
-					if (cIn.startsWith("HELP")) {
-						addRequest(clientName);
-						instUI.addMessage(clientName + " needs help");
-						System.out.println(clientName + " needs help");
-					}
-					
-					if (cIn.startsWith("CHECKPOINT")) {
-						addRequest(clientName);
-						instUI.addMessage(clientName + " finished a checkpoint");
-						System.out.println(clientName + " finished a checkpoint");
-					}
-					
-					if (cIn.startsWith("CLEARLOC")) {
-						instUI.addMessage(clientName + " wants to clear location");
-						System.out.println(clientName + " wants to clear location");
-					}
-					
-					if (cIn.startsWith("CANCEL")) {
-						instUI.addMessage(clientName + " cancelled request");
-						System.out.println(clientName + " cancelled request");
-						removeRequest(clientName);
-					}
-					
-					
-				}	
 			}
 			
 			catch (IOException e) {
@@ -275,6 +299,20 @@ public class InstructorServer {
 				catch (IOException e) {}
 			}
 		}
+		
+		private Vector<String> getTopThree(Vector<String> requests) {
+			Vector<String> topThree = new Vector<String>();
+			try {
+			if(requests.get(0) != null) {topThree.addElement(requests.get(0));}
+			if(requests.get(1) != null) {topThree.addElement(requests.get(1));}
+			if(requests.get(2) != null) {topThree.addElement(requests.get(2));}
+			return topThree;
+			}
+			catch(ArrayIndexOutOfBoundsException e){
+			return topThree;
+			}
+		}
+		
 	}
 
 	
