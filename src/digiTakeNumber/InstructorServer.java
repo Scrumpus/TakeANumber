@@ -136,6 +136,13 @@ public class InstructorServer {
 	 * remove request from server's list of requests
 	 */
 	public void removeRequest(String req) {
+		/*
+		for (int i = 0; i < requests.size(); i++) {
+			if (requests.get(i).equals(req)) {
+				requests.removeElementAt(i);
+			}
+		}
+		*/
 		requests.remove(req);
 		System.out.println(requests);
 	}
@@ -143,6 +150,26 @@ public class InstructorServer {
 	public Vector<String> getClients() {
 		return clients;
 	}
+	
+	public Vector<String> getTopThree() {
+		Vector<String> topThree = new Vector<String>();
+		try {
+		if(requests.get(0) != null) {topThree.addElement(requests.get(0));}
+		if(requests.get(1) != null) {topThree.addElement(requests.get(1));}
+		if(requests.get(2) != null) {topThree.addElement(requests.get(2));}
+		return topThree;
+		}
+		catch(ArrayIndexOutOfBoundsException e){
+		return topThree;
+		}
+	}
+	
+	public void printTopThree() {
+		for (int i = 0; i < topThree.size(); i++) {
+			System.out.println("Request " + i + ": " + topThree.get(i));
+		}
+	}
+	
 	
 	/* 
 	 * creates a new server socket and fires off a thread
@@ -251,17 +278,21 @@ public class InstructorServer {
 						if (cIn == null) return;
 						
 						if (cIn.startsWith("HELP")) {
-							addRequest(clientName);
-							topThree = getTopThree(requests);
+							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
+							topThree = getTopThree();
 							instUI.addMessage(clientName + " needs help");
 							System.out.println(clientName + " needs help");
+							instUI.updateSeats();
+							//printTopThree();
 						}
 						
 						if (cIn.startsWith("CHECKPOINT")) {
-							addRequest(clientName);
+							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							instUI.addMessage(clientName + " finished a checkpoint");
 							System.out.println(clientName + " finished a checkpoint");
-							topThree = getTopThree(requests);
+							topThree = getTopThree();
+							instUI.updateSeats();
+							//printTopThree();
 						}
 						
 						if (cIn.startsWith("CLEARLOC")) {
@@ -279,8 +310,10 @@ public class InstructorServer {
 						if (cIn.startsWith("CANCEL")) {
 							instUI.addMessage(clientName + " cancelled request");
 							System.out.println(clientName + " cancelled request");
-							removeRequest(clientName);
-							topThree = getTopThree(requests);
+							removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
+							topThree = getTopThree();
+							instUI.updateSeats();
+							//printTopThree();
 						}
 						
 						
@@ -300,20 +333,5 @@ public class InstructorServer {
 			}
 		}
 		
-		private Vector<String> getTopThree(Vector<String> requests) {
-			Vector<String> topThree = new Vector<String>();
-			try {
-			if(requests.get(0) != null) {topThree.addElement(requests.get(0));}
-			if(requests.get(1) != null) {topThree.addElement(requests.get(1));}
-			if(requests.get(2) != null) {topThree.addElement(requests.get(2));}
-			return topThree;
-			}
-			catch(ArrayIndexOutOfBoundsException e){
-			return topThree;
-			}
-		}
-		
 	}
-
-	
 }

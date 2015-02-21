@@ -59,6 +59,10 @@ public class InstructorUI {
 		messages.append(message + "\n");
 	}
 	
+	public void updateSeats() {
+		seatingLayout.update();
+	}
+	
 	//helper class that keeps track of the seating layout
 	//as the lab progresses
 	private class SeatingLayout {
@@ -133,11 +137,14 @@ public class InstructorUI {
 					seats.removeAllElements();
 
 					for (int i = 0; i < numRows; i++) {
+						seats.addElement(new Vector<JButton>());
 						for (int j = 0; j < divLoc; j++) {
-							leftSide.add(new JButton("Seat"));
+							seats.get(i).add(new JButton("Seat"));
+							leftSide.add(seats.get(i).get(j));
 						}
-						for (int k = 0; k < numCols - divLoc; k++) {
-							rightSide.add(new JButton("Seat"));
+						for (int k = divLoc; k < numCols; k++) {
+							seats.get(i).add(new JButton("Seat"));
+							rightSide.add(seats.get(i).get(k));
 						}
 					}
 							
@@ -201,11 +208,14 @@ public class InstructorUI {
 			rightSide.setLayout(new GridLayout(numRows, numCols - divLoc));
 			
 			for (int i = 0; i < numRows; i++) {
+				seats.addElement(new Vector<JButton>());
 				for (int j = 0; j < divLoc; j++) {
-					leftSide.add(new JButton(i + " , " + j));
+					seats.get(i).add(new JButton("Seat"));
+					leftSide.add(seats.get(i).get(j));
 				}
-				for (int k = 0; k < numCols - divLoc; k++) {
-					rightSide.add(new JButton(i + " , " + (k+divLoc)));
+				for (int k = divLoc; k < numCols; k++) {
+					seats.get(i).add(new JButton("Seat"));
+					rightSide.add(seats.get(i).get(k));
 				}
 			}
 			
@@ -228,6 +238,31 @@ public class InstructorUI {
 		
 		public void openSeat(int row, int col) {
 			
+		}
+		
+		public void update() {
+			resetButtonText();
+			Vector<String> topThree = server.getTopThree();
+			server.printTopThree();
+			String[] temp;
+			int currPos;
+			int currRow, currCol;
+			for (int i = 0; i < topThree.size(); i++) {
+				currPos = i+1;
+				temp = topThree.get(i).split("#");
+				currRow = Integer.parseInt(temp[1]);
+				currCol = Integer.parseInt(temp[2]);
+				seats.get(currRow).get(currCol).setText("" + currPos);
+			}
+			//refreshFrame();
+		}
+		
+		public void resetButtonText() {
+			for (int i = 0; i < seats.size(); i++) {
+				for (int j = 0; j < seats.get(i).size(); j++) {
+					seats.get(i).get(j).setText("Seat");
+				}
+			}
 		}
 	}
 		
