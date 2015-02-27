@@ -1,8 +1,5 @@
 package digiTakeNumber;
 
-import java.util.PriorityQueue;
-import java.util.Vector;
-
 /**
  * This class keeps track of the queue of requests
  * and the location of each requests in the seating chart
@@ -13,16 +10,12 @@ import java.util.Vector;
 public class LabState {
 	
 	private int[][] seatingChart;
-	private Vector<Request> requestQueue;
 	private int aisleLocation;
 	private int numRows;
 	private int numCols;
 	
 	private static final int EMPTY = 0;
 	private static final int TAKEN = 9;
-	private static final int FIRST = 1;
-	private static final int SECOND = 2;
-	private static final int THIRD = 3;
 	
 	/**
 	 * Default constructor for LabState.
@@ -83,27 +76,4 @@ public class LabState {
 	public int[] getTopThree(){
 		return seatingChart[1];
 	}
-	
-	/**
-	 * Add a request to the end of the priority queue
-	 * @param req Request to be added
-	 * @exception ClassCastException if the specified element cannot be compared with elements currently 
-	 * in this priority queue according to the priority queue's ordering
-	 * @exception NullPointerException If the specified element is null
-	 */
-	public void addRequest(Request req)
-	{
-		return;
-	}
-	
-	/**
-	 * Remove a request from the queue
-	 * @param req Request to be removed
-	 * @exception NullPointerException If the specified element is null
-	 */
-	public void removeRequest(Request req)
-	{
-		return;
-	}
-
 }

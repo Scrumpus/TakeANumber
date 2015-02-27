@@ -1,7 +1,5 @@
 package digiTakeNumber;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -81,8 +79,12 @@ public class Participant {
 	 * Prompt participant for name
 	 */
 	public void setName() {
+		do {
 		name = JOptionPane.showInputDialog(
-				"Enter Your Name");
+				"Enter Your Name. Your name cannot contain #");
+		}
+		while(name.contains("#"));
+
 	}
 	
 	//parse a string of seating states sent by the server into a 

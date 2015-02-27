@@ -1,14 +1,11 @@
 package digiTakeNumber;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
 import java.util.Vector;
 
 
@@ -24,11 +21,7 @@ public class InstructorServer {
 	public static final int PORT_NUM = 8000;
 	
 	private Vector<String> clients;
-	
-	//list of client printwriters so the server can send 
-	//updates to all clients
-	private Vector<PrintWriter> clientWriters;
-	
+		
 	private Vector<String> requests;
 	
 	private InstructorUI instUI;
@@ -46,7 +39,6 @@ public class InstructorServer {
 	 */
 	public InstructorServer() {
 		clients = new Vector<String>();
-		clientWriters = new Vector<PrintWriter>();
 		requests = new Vector<String>();
 		labReady = false;
 	}
@@ -113,13 +105,13 @@ public class InstructorServer {
 	public void addClient(String client, int row, int col) {
 		clients.add(client);
 		System.out.println(client + " sat at " + row + " " + col);
-		instUI.addMessage(client + " sat at " + row + " " + col);
+		//instUI.addMessage(client + " sat at " + row + " " + col);
 	}
 	
 	public void removeClient(String client, int row, int col) {
 		clients.remove(client);
 		System.out.println(client + " cleared location from " + row + " " + col);
-		instUI.addMessage(client + " cleared location from " + row + " " + col);
+		//instUI.addMessage(client + " cleared location from " + row + " " + col);
 	}
 	
 	
@@ -206,10 +198,8 @@ public class InstructorServer {
 		private Socket socket;
 		private BufferedReader input;
 		private PrintWriter output;
-		private InstructorServer server;
 		private int rowLoc;
 		private int colLoc;
-		private boolean connected;
 		
 		public ClientThread(Socket socket) {
 			this.socket = socket;
@@ -239,7 +229,6 @@ public class InstructorServer {
 				int rows = labState.getRows();
 				int cols = labState.getCols();
 				int aisle = labState.getAisle();
-				int[][] sChart = labState.getSeatingChart();
 				String seats = seatsToString();
 				
 				
@@ -280,7 +269,7 @@ public class InstructorServer {
 						if (cIn.startsWith("HELP")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
-							instUI.addMessage(clientName + " needs help");
+							//instUI.addMessage(clientName + " needs help");
 							System.out.println(clientName + " needs help");
 							instUI.updateSeats();
 							//printTopThree();
@@ -288,7 +277,7 @@ public class InstructorServer {
 						
 						if (cIn.startsWith("CHECKPOINT")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
-							instUI.addMessage(clientName + " finished a checkpoint");
+							//instUI.addMessage(clientName + " finished a checkpoint");
 							System.out.println(clientName + " finished a checkpoint");
 							topThree = getTopThree();
 							instUI.updateSeats();
@@ -296,19 +285,16 @@ public class InstructorServer {
 						}
 						
 						if (cIn.startsWith("CLEARLOC")) {
-							instUI.addMessage(clientName + " wants to clear location");
+							//instUI.addMessage(clientName + " wants to clear location");
 							System.out.println(clientName + " wants to clear location");
-							String[] str = cIn.substring(8).split("#");
-							int row = Integer.parseInt(str[0]);
-							int col = Integer.parseInt(str[1]);
-							labState.leaveSeat(row, col);
-							removeClient(clientName, row, col);
+							labState.leaveSeat(rowLoc, colLoc);
+							removeClient(clientName, rowLoc, colLoc);
 							secondLoop = false;
 							firstLoop = true;
 						}
 						
 						if (cIn.startsWith("CANCEL")) {
-							instUI.addMessage(clientName + " cancelled request");
+							//instUI.addMessage(clientName + " cancelled request");
 							System.out.println(clientName + " cancelled request");
 							removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
@@ -320,9 +306,11 @@ public class InstructorServer {
 					}	
 				}
 			}
-			
+			//handle when a client disconnects
 			catch (IOException e) {
 				System.out.println(e);
+				removeClient(clientName, rowLoc, colLoc);
+				labState.leaveSeat(rowLoc, colLoc);
 			}
 			
 			finally {

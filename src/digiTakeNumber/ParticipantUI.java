@@ -1,8 +1,6 @@
 package digiTakeNumber;
 
-import java.awt.Graphics;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -19,7 +17,6 @@ public class ParticipantUI {
 	
 	private RequestMenu reqMenu;
 	private SeatMenu seatMenu;
-	private JFrame locFrame;
 	private Participant client;
 	
 	
@@ -82,6 +79,7 @@ public class ParticipantUI {
 			cpRequest = new JButton("Checkpoint Completed");
 			clearLoc = new JButton("Clear location");
 			cancelRequest = new JButton("Clear Request");
+			cancelRequest.setVisible(false);
 			
 			/*
 			 * request button listeners. Send a string to the server
@@ -115,7 +113,7 @@ public class ParticipantUI {
 			
 			clearLoc.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					client.sendServer("CLEARLOC" + client.getRow() + "#" + client.getCol());
+					client.sendServer("CLEARLOC");
 					client.setRow(-1);
 					client.setCol(-1);
 					showSeatMenu();
@@ -127,7 +125,7 @@ public class ParticipantUI {
 				public void actionPerformed(ActionEvent e) {
 					if (client.isPending()) {
 						client.sendServer("CANCEL");
-						client.togglePending();;
+						client.togglePending();
 						showRequestButtons();
 					}
 				}
@@ -154,11 +152,13 @@ public class ParticipantUI {
 			helpRequest.setVisible(false);
 			cpRequest.setVisible(false);
 			clearLoc.setVisible(false);
+			cancelRequest.setVisible(true);
 		}
 		public void showRequestButtons() {
 			helpRequest.setVisible(true);
 			cpRequest.setVisible(true);
 			clearLoc.setVisible(true);
+			cancelRequest.setVisible(false);
 		}
 		public void remove() {
 			reqFrame.dispose();
@@ -177,7 +177,6 @@ public class ParticipantUI {
 		private JPanel leftSide = new JPanel();
 		private JPanel rightSide = new JPanel();
 		private JPanel seatsPanel = new JPanel();
-		private JButton select = new JButton("Join lab");
 		private GridLayout seatSpacing = new GridLayout(1,2);
 		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
 		
@@ -242,14 +241,6 @@ public class ParticipantUI {
 		}
 		public void show() {
 			seatMenuFrame.setVisible(true);
-		}
-		
-		public void disableSeat(int row, int col) {
-			seats.get(row).get(col).setEnabled(false);
-		}
-		
-		public void enableSeat(int row, int col) {
-			seats.get(row).get(col).setEnabled(true);
 		}
 	}
 

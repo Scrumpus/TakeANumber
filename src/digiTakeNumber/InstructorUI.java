@@ -1,10 +1,8 @@
 package digiTakeNumber;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -35,8 +33,9 @@ public class InstructorUI {
 		iFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		//addCloseButton();
 		setSeatingLayout();
-		addMessageArea();
-		iFrame.pack();
+		//addMessageArea();
+		//iFrame.pack();
+		iFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		iFrame.setVisible(true);
 	}
 	
@@ -82,6 +81,8 @@ public class InstructorUI {
 		//left side and right side of the lab will be put on a 
 		//Gridlayout to show the divisor
 		private GridLayout seatSpacing = new GridLayout(1,2);
+		private GridLayout leftSpacing;
+		private GridLayout rightSpacing;
 		
 		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
 		private JComboBox rowNum;
@@ -91,11 +92,11 @@ public class InstructorUI {
 		private JButton create = new JButton("Create lab");
 		private JButton endLab = new JButton("End lab");
 		private final String[] rowOpts = {"1","2","3","4","5","6","7","8",
-										  "9","10","11","12","13","14","15"};
+										  "9","10"};
 		private final String[] colOpts = {"1","2","3","4","5","6","7","8",
-										  "9","10","11","12","13","14","15"};
+										  "9","10"};
 		private final String[] divOpts = {"1","2","3","4","5","6","7","8",
-				  						  "9","10","11","12","13","14","15"};;
+				  						  "9","10"};;
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public SeatingLayout() {	
 			
@@ -131,19 +132,27 @@ public class InstructorUI {
 					divLoc = Integer.parseInt((String)divisor.getSelectedItem());
 					
 					if (divLoc > numCols) { divLoc = numCols; }
-					leftSide.setLayout(new GridLayout(numRows, divLoc));
-					rightSide.setLayout(new GridLayout(numRows, numCols - divLoc));
+					leftSpacing = new GridLayout(numRows, divLoc);
+					rightSpacing = new GridLayout(numRows, numCols - divLoc);
+					leftSpacing.setHgap(10);
+					leftSpacing.setVgap(10);
+					rightSpacing.setHgap(10);
+					rightSpacing.setVgap(10);
+					leftSide.setLayout(leftSpacing);
+					rightSide.setLayout(rightSpacing);
 					
 					seats.removeAllElements();
 
 					for (int i = 0; i < numRows; i++) {
 						seats.addElement(new Vector<JButton>());
 						for (int j = 0; j < divLoc; j++) {
-							seats.get(i).add(new JButton("Seat"));
+							seats.get(i).add(new JButton(""));
+							seats.get(i).get(j).setFont(new Font("Arial", Font.BOLD, 20));
 							leftSide.add(seats.get(i).get(j));
 						}
 						for (int k = divLoc; k < numCols; k++) {
-							seats.get(i).add(new JButton("Seat"));
+							seats.get(i).add(new JButton(""));
+							seats.get(i).get(k).setFont(new Font("Arial", Font.BOLD, 20));
 							rightSide.add(seats.get(i).get(k));
 						}
 					}
@@ -163,6 +172,7 @@ public class InstructorUI {
 					if (confirm == JOptionPane.YES_OPTION) {
 						server.setLabState(new LabState(numRows, numCols, divLoc));
 						options.removeAll();
+						options.setLayout(new GridLayout(5,5));
 						options.add(endLab);
 						refreshFrame();
 						System.out.println("Lab created");
@@ -188,8 +198,9 @@ public class InstructorUI {
 				}
 			});
 			
-			iFrame.setLayout(new GridLayout(3,1));
-			iFrame.add(seatsPanel);
+			//GridLayout fLayout = new GridLayout(2,1);
+			//iFrame.setLayout(fLayout);
+			iFrame.add(seatsPanel, BorderLayout.CENTER);
 			iFrame.add(options, BorderLayout.SOUTH);
 			refreshFrame();
 		}
@@ -204,22 +215,29 @@ public class InstructorUI {
 			numCols = DEFAULT_COLS;
 			numRows = DEFAULT_ROWS;
 			divLoc = DIVISOR;
-			leftSide.setLayout(new GridLayout(numRows, divLoc));
-			rightSide.setLayout(new GridLayout(numRows, numCols - divLoc));
+			leftSpacing = new GridLayout(numRows, divLoc);
+			rightSpacing = new GridLayout(numRows, numCols - divLoc);
+			leftSpacing.setHgap(10);
+			leftSpacing.setVgap(10);
+			rightSpacing.setHgap(10);
+			rightSpacing.setVgap(10);
+			leftSide.setLayout(leftSpacing);
+			rightSide.setLayout(rightSpacing);
 			
 			for (int i = 0; i < numRows; i++) {
 				seats.addElement(new Vector<JButton>());
 				for (int j = 0; j < divLoc; j++) {
-					seats.get(i).add(new JButton("Seat"));
+					seats.get(i).add(new JButton(""));
+					seats.get(i).get(j).setFont(new Font("Arial", Font.BOLD, 20));
 					leftSide.add(seats.get(i).get(j));
 				}
 				for (int k = divLoc; k < numCols; k++) {
-					seats.get(i).add(new JButton("Seat"));
+					seats.get(i).add(new JButton(""));
+					seats.get(i).get(k).setFont(new Font("Arial", Font.BOLD, 20));
 					rightSide.add(seats.get(i).get(k));
 				}
 			}
 			
-					
 			seatsPanel.add(leftSide);
 			seatsPanel.add(rightSide);
 			seatSpacing.setHgap(30);
@@ -232,27 +250,22 @@ public class InstructorUI {
 			refreshFrame();
 		}
 		
-		public void disableSeat(int row, int col) {
-			
-		}
-		
-		public void openSeat(int row, int col) {
-			
-		}
-		
 		public void update() {
 			resetButtonText();
 			Vector<String> topThree = server.getTopThree();
 			server.printTopThree();
 			String[] temp;
-			int currPos;
+			int currPos = 0;
 			int currRow, currCol;
+			Vector<String> clients = server.getClients();
+			String name;
 			for (int i = 0; i < topThree.size(); i++) {
-				currPos = i+1;
 				temp = topThree.get(i).split("#");
 				currRow = Integer.parseInt(temp[1]);
 				currCol = Integer.parseInt(temp[2]);
-				seats.get(currRow).get(currCol).setText("" + currPos);
+				name = clients.get(currPos);
+				currPos = i+1;
+				seats.get(currRow).get(currCol).setText("" + currPos + ") " + name);
 			}
 			//refreshFrame();
 		}
@@ -260,7 +273,7 @@ public class InstructorUI {
 		public void resetButtonText() {
 			for (int i = 0; i < seats.size(); i++) {
 				for (int j = 0; j < seats.get(i).size(); j++) {
-					seats.get(i).get(j).setText("Seat");
+					seats.get(i).get(j).setText("");
 				}
 			}
 		}
