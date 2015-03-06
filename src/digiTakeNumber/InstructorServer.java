@@ -6,7 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /*
@@ -20,9 +21,9 @@ public class InstructorServer {
 	//arbitrary port number
 	public static final int PORT_NUM = 8000;
 	
-	private Vector<String> clients;
+	private List<String> clients;
 		
-	private Vector<String> requests;
+	private List<String> requests;
 	
 	private InstructorUI instUI;
 	
@@ -32,14 +33,14 @@ public class InstructorServer {
 	
 	private boolean labReady;
 	
-	private Vector<String> topThree;
+	private List<String> topThree;
 	
 	/*
 	 * Instantiate instance variables
 	 */
 	public InstructorServer() {
-		clients = new Vector<String>();
-		requests = new Vector<String>();
+		clients = new ArrayList<String>();
+		requests = new ArrayList<String>();
 		labReady = false;
 	}
 	
@@ -120,7 +121,7 @@ public class InstructorServer {
 	 * requests
 	 */
 	public void addRequest(String req) {
-		requests.addElement(req);
+		requests.add(req);
 		System.out.println(requests);
 	}
 	
@@ -128,32 +129,20 @@ public class InstructorServer {
 	 * remove request from server's list of requests
 	 */
 	public void removeRequest(String req) {
-		/*
-		for (int i = 0; i < requests.size(); i++) {
-			if (requests.get(i).equals(req)) {
-				requests.removeElementAt(i);
-			}
-		}
-		*/
 		requests.remove(req);
 		System.out.println(requests);
 	}
 	
-	public Vector<String> getClients() {
+	public List<String> getClients() {
 		return clients;
 	}
 	
-	public Vector<String> getTopThree() {
-		Vector<String> topThree = new Vector<String>();
-		try {
-		if(requests.get(0) != null) {topThree.addElement(requests.get(0));}
-		if(requests.get(1) != null) {topThree.addElement(requests.get(1));}
-		if(requests.get(2) != null) {topThree.addElement(requests.get(2));}
-		return topThree;
+	public List<String> getTopThree() {
+		List<String> topThree = new ArrayList<String>();
+		for (int i = 0; i < requests.size(); i++) {
+			topThree.add(requests.get(i));
 		}
-		catch(ArrayIndexOutOfBoundsException e){
 		return topThree;
-		}
 	}
 	
 	public void printTopThree() {
@@ -309,8 +298,10 @@ public class InstructorServer {
 			//handle when a client disconnects
 			catch (IOException e) {
 				System.out.println(e);
+				removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
 				removeClient(clientName, rowLoc, colLoc);
 				labState.leaveSeat(rowLoc, colLoc);
+				instUI.updateSeats();
 			}
 			
 			finally {

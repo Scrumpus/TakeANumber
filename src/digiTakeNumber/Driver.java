@@ -1,6 +1,5 @@
 package digiTakeNumber;
 
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

@@ -6,8 +6,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -58,6 +59,7 @@ public class InstructorUI {
 		messages.append(message + "\n");
 	}
 	
+	//update the seating display
 	public void updateSeats() {
 		seatingLayout.update();
 	}
@@ -84,7 +86,7 @@ public class InstructorUI {
 		private GridLayout leftSpacing;
 		private GridLayout rightSpacing;
 		
-		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
+		private List<ArrayList<JButton>> seats = new ArrayList<ArrayList<JButton>>();
 		private JComboBox rowNum;
 		private JComboBox colNum;
 		private JComboBox divisor;
@@ -141,10 +143,10 @@ public class InstructorUI {
 					leftSide.setLayout(leftSpacing);
 					rightSide.setLayout(rightSpacing);
 					
-					seats.removeAllElements();
+					seats.clear();
 
 					for (int i = 0; i < numRows; i++) {
-						seats.addElement(new Vector<JButton>());
+						seats.add(new ArrayList<JButton>());
 						for (int j = 0; j < divLoc; j++) {
 							seats.get(i).add(new JButton(""));
 							seats.get(i).get(j).setFont(new Font("Arial", Font.BOLD, 20));
@@ -210,7 +212,7 @@ public class InstructorUI {
 			leftSide.removeAll();
 			rightSide.removeAll();
 			seatsPanel.removeAll();
-			seats.removeAllElements();
+			seats.clear();
 			
 			numCols = DEFAULT_COLS;
 			numRows = DEFAULT_ROWS;
@@ -225,7 +227,7 @@ public class InstructorUI {
 			rightSide.setLayout(rightSpacing);
 			
 			for (int i = 0; i < numRows; i++) {
-				seats.addElement(new Vector<JButton>());
+				seats.add(new ArrayList<JButton>());
 				for (int j = 0; j < divLoc; j++) {
 					seats.get(i).add(new JButton(""));
 					seats.get(i).get(j).setFont(new Font("Arial", Font.BOLD, 20));
@@ -252,12 +254,12 @@ public class InstructorUI {
 		
 		public void update() {
 			resetButtonText();
-			Vector<String> topThree = server.getTopThree();
+			List<String> topThree = server.getTopThree();
 			server.printTopThree();
 			String[] temp;
 			int currPos = 0;
 			int currRow, currCol;
-			Vector<String> clients = server.getClients();
+			List<String> clients = server.getClients();
 			String name;
 			for (int i = 0; i < topThree.size(); i++) {
 				temp = topThree.get(i).split("#");

@@ -3,7 +3,8 @@ package digiTakeNumber;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -178,7 +179,7 @@ public class ParticipantUI {
 		private JPanel rightSide = new JPanel();
 		private JPanel seatsPanel = new JPanel();
 		private GridLayout seatSpacing = new GridLayout(1,2);
-		private Vector<Vector<JButton>> seats = new Vector<Vector<JButton>>();
+		private List<ArrayList<JButton>> seats = new ArrayList<ArrayList<JButton>>();
 		
 		public SeatMenu(int rows, int cols, int aisle, int[][] seatStates) {
 			this.rows = rows;
@@ -193,7 +194,7 @@ public class ParticipantUI {
 			rightSide.setLayout(new GridLayout(rows, cols - aisle));
 			
 			for (int i = 0; i < rows; i++) {
-				seats.addElement(new Vector<JButton>());
+				seats.add(new ArrayList<JButton>());
 				for (int j = 0; j < aisle; j++) {
 					seats.get(i).add(new JButton("Seat"));
 					if (seatStates[i][j] != 0) {
