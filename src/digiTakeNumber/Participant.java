@@ -76,15 +76,29 @@ public class Participant {
 	
 	
 	/*
-	 * Prompt participant for name
+	 * Prompt participant for name. Make sure name is not empty
+	 * and does not contain '#'
 	 */
 	public void setName() {
+		boolean validName = false;
 		do {
 		name = JOptionPane.showInputDialog(
-				"Enter Your Name. Your name cannot contain #");
+				"Enter Your Name. Your name cannot contain '#'");
+		if (name == null) {
+			name = JOptionPane.showInputDialog("Did not enter your name. "
+					+ "Please enter your name. Cannot contain '#'");
 		}
-		while(name.contains("#"));
-
+		if (name.equals("")) {
+			name = JOptionPane.showInputDialog("Did not enter your name. "
+					+ "Please enter your name. Cannot contain '#'");
+		}
+		else if (name.contains("#")) {
+			name = JOptionPane.showInputDialog("Entered name contains '#'."
+					+ "Please enter your name. Cannot contain '#'");
+		}
+		else validName = true;
+		}
+		while(!validName);
 	}
 	
 	//parse a string of seating states sent by the server into a 
@@ -114,7 +128,7 @@ public class Participant {
 		System.out.println("Start listening");
 		
 		//create a thread that constantly listens for server messages
-		new ServerThread(this).start();
+		new ServerThread(this, socket).start();
 		
 	}
 	
@@ -122,8 +136,10 @@ public class Participant {
 	// and reponds to server messages
 	private class ServerThread extends Thread {
 		private Participant client;
-		public ServerThread(Participant client) {
+		private Socket socket;
+		public ServerThread(Participant client, Socket socket) {
 			this.client = client;
+			this.socket = socket;
 		}
 		public void run() {
 			int row, col, aisle;
@@ -153,12 +169,9 @@ public class Participant {
 					
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			
-			
+				JOptionPane.showMessageDialog(pUI.getFrame(), "The lab has disconnected");
+				System.exit(0);
+			}	
 		}
 	}
-	
 }

@@ -19,6 +19,7 @@ public class ParticipantUI {
 	private RequestMenu reqMenu;
 	private SeatMenu seatMenu;
 	private Participant client;
+	private JFrame currFrame;
 	
 	
 	/**
@@ -31,6 +32,10 @@ public class ParticipantUI {
 	public void refresh(JFrame frame) {
 		frame.revalidate();
 		frame.repaint();
+	}
+	
+	public JFrame getFrame() {
+		return currFrame;
 	}
 	
 	public void hideReq() {
@@ -141,6 +146,8 @@ public class ParticipantUI {
 			reqFrame.add(buttonPanel);
 			reqFrame.revalidate();
 			reqFrame.repaint();
+			
+			currFrame = reqFrame;
 		}
 		
 		public void hide() {
@@ -220,6 +227,7 @@ public class ParticipantUI {
 			seatMenuFrame.pack();
 			seatMenuFrame.setVisible(true);
 			refresh(seatMenuFrame);
+			currFrame = seatMenuFrame;
 		}
 		
 		//handles which seat got selected by the client
@@ -244,5 +252,4 @@ public class ParticipantUI {
 			seatMenuFrame.setVisible(true);
 		}
 	}
-
 }

@@ -70,8 +70,6 @@ public class InstructorServer {
 		int[][] seats = labState.getSeatingChart();
 		int rows = labState.getRows();
 		int cols = labState.getCols();
-		//System.out.println(rows);
-		//System.out.println(cols);
 		for (int i = 0; i < rows; i++) {
 			for (int j =0; j < cols; j ++) {
 				temp = temp + seats[i][j];
@@ -141,13 +139,16 @@ public class InstructorServer {
 		List<String> topThree = new ArrayList<String>();
 		for (int i = 0; i < requests.size(); i++) {
 			topThree.add(requests.get(i));
+			if (i == 2) break;
 		}
 		return topThree;
 	}
 	
 	public void printTopThree() {
-		for (int i = 0; i < topThree.size(); i++) {
-			System.out.println("Request " + i + ": " + topThree.get(i));
+		if (topThree != null) {
+			for (int i = 0; i < topThree.size(); i++) {
+				System.out.println("Request " + i + ": " + topThree.get(i));
+			}
 		}
 	}
 	
@@ -248,7 +249,7 @@ public class InstructorServer {
 					}
 					
 					
-					//wait for client requests, add message
+					//wait for client requests, send message
 					//depending on the request
 					
 					while (secondLoop) {
@@ -290,8 +291,6 @@ public class InstructorServer {
 							instUI.updateSeats();
 							//printTopThree();
 						}
-						
-						
 					}	
 				}
 			}

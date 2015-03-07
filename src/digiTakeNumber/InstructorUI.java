@@ -200,8 +200,6 @@ public class InstructorUI {
 				}
 			});
 			
-			//GridLayout fLayout = new GridLayout(2,1);
-			//iFrame.setLayout(fLayout);
 			iFrame.add(seatsPanel, BorderLayout.CENTER);
 			iFrame.add(options, BorderLayout.SOUTH);
 			refreshFrame();
@@ -252,6 +250,7 @@ public class InstructorUI {
 			refreshFrame();
 		}
 		
+		//update the top three requests display
 		public void update() {
 			resetButtonText();
 			List<String> topThree = server.getTopThree();
@@ -259,17 +258,15 @@ public class InstructorUI {
 			String[] temp;
 			int currPos = 0;
 			int currRow, currCol;
-			List<String> clients = server.getClients();
 			String name;
 			for (int i = 0; i < topThree.size(); i++) {
 				temp = topThree.get(i).split("#");
+				name = temp[0];
 				currRow = Integer.parseInt(temp[1]);
 				currCol = Integer.parseInt(temp[2]);
-				name = clients.get(currPos);
 				currPos = i+1;
 				seats.get(currRow).get(currCol).setText("" + currPos + ") " + name);
 			}
-			//refreshFrame();
 		}
 		
 		public void resetButtonText() {

@@ -1,6 +1,5 @@
 package digiTakeNumber;
 
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class Driver {
 	 * Uses one of these to draw the initial Welcome Screen, putting the user in a position to choose. 
 	 * "Create Lab" or "Join Lab"
 	 */
-	private void init(){
+	public void init(){
 		instructor = null;
 		participant = null;
 	}
@@ -96,14 +95,11 @@ public class Driver {
 					//remove the welcome frame
 					welcomeFrame.dispose();
 					
-				} catch (IOException ioe) {
-					//ioe.printStackTrace();
-					
+				} catch (IOException ioe) {					
 					//message if connection to lab failed
 					JOptionPane.showMessageDialog(welcomeFrame, "Could not connect to lab");
 					return;
 				}
-				
 			}
 		}
 		);
@@ -124,5 +120,4 @@ public class Driver {
 		welcomeFrame.revalidate();
 		welcomeFrame.repaint();
 	}
-
 }
