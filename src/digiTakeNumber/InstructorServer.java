@@ -25,6 +25,8 @@ public class InstructorServer {
 		
 	private List<String> requests;
 	
+	private List<PrintWriter> clientStreams;
+	
 	private InstructorUI instUI;
 	
 	private ServerSocket sSocket;
@@ -41,6 +43,7 @@ public class InstructorServer {
 	public InstructorServer() {
 		clients = new ArrayList<String>();
 		requests = new ArrayList<String>();
+		clientStreams = new ArrayList<PrintWriter>();
 		labReady = false;
 	}
 	
@@ -77,7 +80,12 @@ public class InstructorServer {
 		}
 		return temp;
 	}
-		
+	
+	public void sendToClients(String msg) {
+		for (PrintWriter pw : clientStreams) {
+			pw.println(msg);
+		}
+	}
 	/*
 	 * Creates a listener thread that constantly listens 
 	 * for new clients to connect. Creating a listener thread
@@ -202,7 +210,7 @@ public class InstructorServer {
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
 				output = new PrintWriter(socket.getOutputStream(), true);
-				
+				clientStreams.add(output);
 				String cIn;
 				
 				//wait to get client's name
@@ -245,6 +253,8 @@ public class InstructorServer {
 							addClient(clientName, rowLoc, colLoc);
 							firstLoop = false;
 							secondLoop = true;
+							
+							sendToClients("TAKESEAT:" + takeRow + "#" + takeCol);
 						}
 					}
 					
@@ -281,6 +291,7 @@ public class InstructorServer {
 							removeClient(clientName, rowLoc, colLoc);
 							secondLoop = false;
 							firstLoop = true;
+							sendToClients("CLEARSEAT:" + rowLoc + "#" + colLoc);
 						}
 						
 						if (cIn.startsWith("CANCEL")) {

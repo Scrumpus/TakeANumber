@@ -50,7 +50,6 @@ public class ParticipantUI {
 	
 	
 	public void setSeatMenu(int row, int col, int pos, int[][] seatStates) {
-		//hideReq();
 		seatMenu =  new SeatMenu(row, col, pos, seatStates);
 		seatMenu.init();
 	}
@@ -62,6 +61,13 @@ public class ParticipantUI {
 	}
 	public void showSeatMenu() {
 		seatMenu.show();
+	}
+	
+	public void takeSeat(int row, int col) {
+		seatMenu.disableSeat(row, col);
+	}
+	public void leaveSeat(int row, int col) {
+		seatMenu.enableSeat(row, col);
 	}
 	
 	/*
@@ -243,6 +249,14 @@ public class ParticipantUI {
 					showReq();
 				}
 			};
+		}
+		
+		public void disableSeat(int row, int col) {
+			seats.get(row).get(col).setEnabled(false);
+		}
+		
+		public void enableSeat(int row, int col) {
+			seats.get(row).get(col).setEnabled(true);
 		}
 		
 		public void hide() {

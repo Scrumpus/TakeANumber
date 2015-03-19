@@ -167,6 +167,20 @@ public class Participant {
 
 					}
 					
+					else if(sIn.startsWith("TAKESEAT:")) {
+						String[] dims = sIn.substring(9).split("#");
+						int takeRow = Integer.parseInt(dims[0]);
+						int takeCol = Integer.parseInt(dims[1]);
+						pUI.takeSeat(takeRow, takeCol);
+					}
+					
+					else if (sIn.startsWith("CLEARSEAT:")) {
+						String[] dims = sIn.substring(10).split("#");
+						int takeRow = Integer.parseInt(dims[0]);
+						int takeCol = Integer.parseInt(dims[1]);
+						pUI.leaveSeat(takeRow, takeCol);
+					}
+					
 				}
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(pUI.getFrame(), "The lab has disconnected");
