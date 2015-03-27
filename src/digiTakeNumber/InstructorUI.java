@@ -177,7 +177,6 @@ public class InstructorUI {
 						options.setLayout(new GridLayout(5,5));
 						options.add(endLab);
 						refreshFrame();
-						System.out.println("Lab created");
 						
 						// start listening for clients
 						try {
@@ -254,7 +253,6 @@ public class InstructorUI {
 		public void update() {
 			resetButtonText();
 			List<String> topThree = server.getTopThree();
-			server.printTopThree();
 			String[] temp;
 			int currPos = 0;
 			int currRow, currCol;

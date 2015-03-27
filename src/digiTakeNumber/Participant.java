@@ -20,6 +20,7 @@ public class Participant {
 	private String serverIP;
 	private int seatRow;
 	private int seatCol;
+	private int currPos;
 	private boolean pendingReq;
 	private LabState labState;
 	
@@ -30,12 +31,14 @@ public class Participant {
 	//prompt the participant for the server IP address and name
 	public Participant() {
 		pendingReq = false;
+		currPos = 0;
 		setServerIP();
 		setName();
 	}
 	
 	public int getRow() { return seatRow; }
 	public int getCol() { return seatCol; }
+	public int getPos() { return currPos; }
 	public void setRow(int row) { seatRow = row; }
 	public void setCol(int col) { seatCol = col; }
 	
@@ -125,7 +128,6 @@ public class Participant {
 		input = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()));
 		output = new PrintWriter(socket.getOutputStream(), true);
-		System.out.println("Start listening");
 		
 		//create a thread that constantly listens for server messages
 		new ServerThread(this, socket).start();
@@ -161,7 +163,6 @@ public class Participant {
 						col = Integer.parseInt(dims[1]);
 						aisle = Integer.parseInt(dims[2]);
 						labState = new LabState(row, col, aisle);
-						System.out.println(dims[3]);
 						int[][] seatStates = parseSeatingStates(dims[3]);
 						pUI.setSeatMenu(row, col, aisle, seatStates);
 
@@ -173,12 +174,25 @@ public class Participant {
 						int takeCol = Integer.parseInt(dims[1]);
 						pUI.takeSeat(takeRow, takeCol);
 					}
-					
 					else if (sIn.startsWith("CLEARSEAT:")) {
 						String[] dims = sIn.substring(10).split("#");
 						int takeRow = Integer.parseInt(dims[0]);
 						int takeCol = Integer.parseInt(dims[1]);
 						pUI.leaveSeat(takeRow, takeCol);
+					}
+					
+					else if (sIn.startsWith("CLEARREQ:")) {
+						int pos = Integer.parseInt(sIn.substring(9));
+						System.out.println("Clear " + pos);
+						if (pos < currPos) {
+							currPos -= 1;
+							pUI.showPosition(currPos);
+						}
+					}
+					
+					else if (sIn.startsWith("POSITION:")) {
+						currPos = Integer.parseInt(sIn.substring(9));
+						pUI.showPosition(currPos);
 					}
 					
 				}

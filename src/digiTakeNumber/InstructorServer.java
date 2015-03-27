@@ -111,14 +111,10 @@ public class InstructorServer {
 	 */
 	public void addClient(String client, int row, int col) {
 		clients.add(client);
-		System.out.println(client + " sat at " + row + " " + col);
-		//instUI.addMessage(client + " sat at " + row + " " + col);
 	}
 	
 	public void removeClient(String client, int row, int col) {
 		clients.remove(client);
-		System.out.println(client + " cleared location from " + row + " " + col);
-		//instUI.addMessage(client + " cleared location from " + row + " " + col);
 	}
 	
 	
@@ -128,15 +124,12 @@ public class InstructorServer {
 	 */
 	public void addRequest(String req) {
 		requests.add(req);
-		System.out.println(requests);
 	}
-	
 	/*
 	 * remove request from server's list of requests
 	 */
 	public void removeRequest(String req) {
 		requests.remove(req);
-		System.out.println(requests);
 	}
 	
 	public List<String> getClients() {
@@ -205,7 +198,6 @@ public class InstructorServer {
 		
 		public void run() {
 			try {
-				System.out.println("New client");
 				//set up input and output streams between client and server
 				input = new BufferedReader(new InputStreamReader(
 						socket.getInputStream()));
@@ -269,24 +261,18 @@ public class InstructorServer {
 						if (cIn.startsWith("HELP")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
-							//instUI.addMessage(clientName + " needs help");
-							System.out.println(clientName + " needs help");
+							output.println("POSITION:" + requests.size());
 							instUI.updateSeats();
-							//printTopThree();
 						}
 						
 						if (cIn.startsWith("CHECKPOINT")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
-							//instUI.addMessage(clientName + " finished a checkpoint");
-							System.out.println(clientName + " finished a checkpoint");
 							topThree = getTopThree();
+							output.println("POSITION:" + requests.size());
 							instUI.updateSeats();
-							//printTopThree();
 						}
 						
 						if (cIn.startsWith("CLEARLOC")) {
-							//instUI.addMessage(clientName + " wants to clear location");
-							System.out.println(clientName + " wants to clear location");
 							labState.leaveSeat(rowLoc, colLoc);
 							removeClient(clientName, rowLoc, colLoc);
 							secondLoop = false;
@@ -294,13 +280,13 @@ public class InstructorServer {
 							sendToClients("CLEARSEAT:" + rowLoc + "#" + colLoc);
 						}
 						
-						if (cIn.startsWith("CANCEL")) {
-							//instUI.addMessage(clientName + " cancelled request");
+						if (cIn.startsWith("CANCEL:")) {
 							System.out.println(clientName + " cancelled request");
+							System.out.println(Integer.parseInt(cIn.substring(7)));
+							sendToClients("CLEARREQ:" + Integer.parseInt(cIn.substring(7)));
 							removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
 							instUI.updateSeats();
-							//printTopThree();
 						}
 					}	
 				}
@@ -310,6 +296,8 @@ public class InstructorServer {
 				System.out.println(e);
 				removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
 				removeClient(clientName, rowLoc, colLoc);
+				clientStreams.remove(output);
+				sendToClients("CLEARSEAT:" + rowLoc + "#" + colLoc);
 				labState.leaveSeat(rowLoc, colLoc);
 				instUI.updateSeats();
 			}

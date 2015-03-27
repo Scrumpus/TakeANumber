@@ -20,8 +20,6 @@ public class ParticipantUI {
 	private SeatMenu seatMenu;
 	private Participant client;
 	private JFrame currFrame;
-	
-	
 	/**
 	 * Constructor for the ClientUI class
 	 */
@@ -70,6 +68,9 @@ public class ParticipantUI {
 		seatMenu.enableSeat(row, col);
 	}
 	
+	public void showPosition(int pos) {
+		reqMenu.showPosition(pos);
+	}
 	/*
 	 * Helper class to manage request menu
 	 */
@@ -80,6 +81,8 @@ public class ParticipantUI {
 		private JButton cpRequest;
 		private JButton clearLoc;
 		private JButton cancelRequest;
+		private JLabel reqConfirm;
+		private JLabel showPos;
 		
 		public RequestMenu() {
 			reqFrame = new JFrame("Request Frame");
@@ -91,7 +94,11 @@ public class ParticipantUI {
 			cpRequest = new JButton("Checkpoint Completed");
 			clearLoc = new JButton("Clear location");
 			cancelRequest = new JButton("Clear Request");
+			reqConfirm = new JLabel("Your request has been submitted");
+			showPos = new JLabel();
 			cancelRequest.setVisible(false);
+			reqConfirm.setVisible(false);
+			showPos.setVisible(false);
 			
 			/*
 			 * request button listeners. Send a string to the server
@@ -104,9 +111,6 @@ public class ParticipantUI {
 						client.togglePending();
 						hideRequestButtons();
 					}
-					else {
-						System.out.println("Request already pending");
-					}
 				}
 			});
 			
@@ -116,9 +120,6 @@ public class ParticipantUI {
 						client.sendServer("CHECKPOINT");
 						client.togglePending();
 						hideRequestButtons();
-					}
-					else {
-						System.out.println("Request already pending");
 					}
 				}
 			});
@@ -136,7 +137,7 @@ public class ParticipantUI {
 			cancelRequest.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (client.isPending()) {
-						client.sendServer("CANCEL");
+						client.sendServer("CANCEL:" + client.getPos());
 						client.togglePending();
 						showRequestButtons();
 					}
@@ -148,6 +149,8 @@ public class ParticipantUI {
 			buttonPanel.add(cpRequest);
 			buttonPanel.add(clearLoc);
 			buttonPanel.add(cancelRequest);
+			buttonPanel.add(reqConfirm);
+			buttonPanel.add(showPos);
 			
 			reqFrame.add(buttonPanel);
 			reqFrame.revalidate();
@@ -167,15 +170,22 @@ public class ParticipantUI {
 			cpRequest.setVisible(false);
 			clearLoc.setVisible(false);
 			cancelRequest.setVisible(true);
+			reqConfirm.setVisible(true);
+			showPos.setVisible(true);
 		}
 		public void showRequestButtons() {
 			helpRequest.setVisible(true);
 			cpRequest.setVisible(true);
 			clearLoc.setVisible(true);
 			cancelRequest.setVisible(false);
+			reqConfirm.setVisible(false);
+			showPos.setVisible(false);
 		}
 		public void remove() {
 			reqFrame.dispose();
+		}
+		public void showPosition(int pos) {
+			showPos.setText("Your position in line is " + pos);
 		}
 	}	
 	
@@ -242,8 +252,6 @@ public class ParticipantUI {
 				public void actionPerformed(ActionEvent e) {
 					client.setRow(row);
 					client.setCol(col);
-					System.out.println("client row: " + row);
-					System.out.println("client col: " + col);
 					client.sendServer("TAKESEAT:" + row + "#" + col);
 					hideSeatMenu();
 					showReq();
