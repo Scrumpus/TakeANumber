@@ -12,7 +12,7 @@ import javax.swing.*;
 /**
  * A class to do all the drawing for a Client object
  * @author Team Digital Take-A-Number 
- *
+ * @version 04/02/2015
  */
 public class ParticipantUI {
 	
@@ -94,7 +94,7 @@ public class ParticipantUI {
 			cpRequest = new JButton("Checkpoint Completed");
 			clearLoc = new JButton("Clear location");
 			cancelRequest = new JButton("Clear Request");
-			reqConfirm = new JLabel("Your request has been submitted");
+			reqConfirm = new JLabel("Your request has been submitted.");
 			showPos = new JLabel();
 			cancelRequest.setVisible(false);
 			reqConfirm.setVisible(false);
@@ -148,9 +148,10 @@ public class ParticipantUI {
 			buttonPanel.add(helpRequest);
 			buttonPanel.add(cpRequest);
 			buttonPanel.add(clearLoc);
-			buttonPanel.add(cancelRequest);
 			buttonPanel.add(reqConfirm);
 			buttonPanel.add(showPos);
+			buttonPanel.add(cancelRequest);
+			
 			
 			reqFrame.add(buttonPanel);
 			reqFrame.revalidate();

@@ -9,10 +9,12 @@ import java.net.Socket;
 import javax.swing.JOptionPane;
 
 
-/*
+/**
  * This class connects a client to a server
  * and gives options to send requests to the 
  * server 
+ * @author Team Digital Take-A-Number
+ * @version 04/02/2015
  */
 
 public class Participant {
@@ -168,6 +170,7 @@ public class Participant {
 
 					}
 					
+					//update layout if a seat is taken
 					else if(sIn.startsWith("TAKESEAT:")) {
 						String[] dims = sIn.substring(9).split("#");
 						int takeRow = Integer.parseInt(dims[0]);
@@ -181,6 +184,7 @@ public class Participant {
 						pUI.leaveSeat(takeRow, takeCol);
 					}
 					
+					//update position display if a request is removed
 					else if (sIn.startsWith("CLEARREQ:")) {
 						int pos = Integer.parseInt(sIn.substring(9));
 						System.out.println("Clear " + pos);
@@ -190,6 +194,7 @@ public class Participant {
 						}
 					}
 					
+					//get current position in queue
 					else if (sIn.startsWith("POSITION:")) {
 						currPos = Integer.parseInt(sIn.substring(9));
 						pUI.showPosition(currPos);

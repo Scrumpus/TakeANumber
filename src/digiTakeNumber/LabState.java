@@ -4,7 +4,7 @@ package digiTakeNumber;
  * This class keeps track of the queue of requests
  * and the location of each requests in the seating chart
  * @author Scott Schwalbe
- * @version 11/16/2014
+ * @version 04/02/2015
  */
 
 public class LabState {

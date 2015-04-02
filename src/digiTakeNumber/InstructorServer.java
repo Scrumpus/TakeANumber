@@ -14,6 +14,8 @@ import java.util.List;
  * This class sets up a server and allows multiple
  * clients to connect to it. Also responds accordingly
  * to any client input
+ * @author Team Digital Take-A-Number
+ * @version 04/02/2015
  */
 
 public class InstructorServer {
@@ -81,6 +83,7 @@ public class InstructorServer {
 		return temp;
 	}
 	
+	//send a message to all connected clients
 	public void sendToClients(String msg) {
 		for (PrintWriter pw : clientStreams) {
 			pw.println(msg);
@@ -113,6 +116,9 @@ public class InstructorServer {
 		clients.add(client);
 	}
 	
+	/*
+	 * remove client from server's list of clients
+	 */
 	public void removeClient(String client, int row, int col) {
 		clients.remove(client);
 	}
@@ -258,6 +264,7 @@ public class InstructorServer {
 						cIn = input.readLine();
 						if (cIn == null) return;
 						
+						//add request and update the seating display
 						if (cIn.startsWith("HELP")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
@@ -265,6 +272,7 @@ public class InstructorServer {
 							instUI.updateSeats();
 						}
 						
+						//add request and update the seating display
 						if (cIn.startsWith("CHECKPOINT")) {
 							addRequest(clientName + "#" + rowLoc + "#" + colLoc);
 							topThree = getTopThree();
@@ -272,6 +280,7 @@ public class InstructorServer {
 							instUI.updateSeats();
 						}
 						
+						//clear client's location
 						if (cIn.startsWith("CLEARLOC")) {
 							labState.leaveSeat(rowLoc, colLoc);
 							removeClient(clientName, rowLoc, colLoc);
@@ -280,6 +289,7 @@ public class InstructorServer {
 							sendToClients("CLEARSEAT:" + rowLoc + "#" + colLoc);
 						}
 						
+						//clear client's request
 						if (cIn.startsWith("CANCEL:")) {
 							System.out.println(clientName + " cancelled request");
 							System.out.println(Integer.parseInt(cIn.substring(7)));

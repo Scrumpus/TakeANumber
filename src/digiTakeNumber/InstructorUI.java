@@ -16,7 +16,7 @@ import javax.swing.*;
  * This class contains all graphic components for each
  * Server UI screen. 
  * @author Team Digital Take-A-Number
- * @version 11/16/2014
+ * @version 04/02/2014
  */
 public class InstructorUI {
 	
