@@ -168,18 +168,22 @@ public class InstructorServer {
 	private class ListenerThread extends Thread {
 		public ListenerThread() { };
 		public void run() {
-			try {
-				sSocket = new ServerSocket(PORT_NUM);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			while(true) {
+			for (int i = 0; i < 50; i++) {
 				try {
-					//every time a new client connects, create a new
-					//thread and run it
-					new ClientThread(sSocket.accept()).start();
-				} catch (IOException e) {
-					e.printStackTrace();
+					sSocket = new ServerSocket(PORT_NUM + i);
+					break;
+				} catch (IOException e1) {
+				}
+			}
+			if (sSocket != null) {
+				while(true) {
+					try {
+						//every time a new client connects, create a new
+						//thread and run it
+						new ClientThread(sSocket.accept()).start();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

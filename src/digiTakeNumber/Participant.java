@@ -126,13 +126,23 @@ public class Participant {
 	 * participant and server.
 	 */
 	public void connectToServer() throws IOException {
-		Socket socket = new Socket(serverIP, InstructorServer.PORT_NUM);
-		input = new BufferedReader(new InputStreamReader(
-				socket.getInputStream()));
-		output = new PrintWriter(socket.getOutputStream(), true);
-		
-		//create a thread that constantly listens for server messages
-		new ServerThread(this, socket).start();
+		for (int i = 0; i < 50; i++) {
+			try {
+				Socket socket = new Socket(serverIP, InstructorServer.PORT_NUM + i);
+				input = new BufferedReader(new InputStreamReader(
+						socket.getInputStream()));
+				output = new PrintWriter(socket.getOutputStream(), true);
+				
+				//create a thread that constantly listens for server messages
+				new ServerThread(this, socket).start();
+				break;
+			}
+			catch (IOException e) {
+				if (i == 49) {
+					throw new IOException();
+				}
+			}
+		}
 		
 	}
 	
