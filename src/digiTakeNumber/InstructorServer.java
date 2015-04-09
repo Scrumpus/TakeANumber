@@ -308,7 +308,11 @@ public class InstructorServer {
 			//handle when a client disconnects
 			catch (IOException e) {
 				System.out.println(e);
+				int reqLoc = requests.indexOf(clientName + "#" + rowLoc + "#" + colLoc);
 				removeRequest(clientName + "#" + rowLoc + "#" + colLoc);
+				if (reqLoc != -1) {
+					sendToClients("CLEARREQ:" + reqLoc);
+				}
 				removeClient(clientName, rowLoc, colLoc);
 				clientStreams.remove(output);
 				sendToClients("CLEARSEAT:" + rowLoc + "#" + colLoc);
